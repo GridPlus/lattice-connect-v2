@@ -1,0 +1,11 @@
+config:
+  aws:profile: gridplus-aws
+  aws:region: us-east-1
+  lattice-connect-v2:credentials:
+    password:
+      secure: AAABAOe0fS/0sZ6IomJ5h+Fep92tNtF9jt/x43FRofcL9P2Gt0YyQI5KErQGSSbZ7neQ1xR6gq0w/AdAfjaTc+CGkfjNytt3X3JQebjg4Gc=
+    username:
+      secure: AAABANMcQYCGwd5O/WjgfYKqalqDRn+LTJEjS3mnKWjH9gqlMAqKYvCNI2br
+  lattice-connect-v2:deploy:
+    env: prod
+    hostname: connect.gridpl.us

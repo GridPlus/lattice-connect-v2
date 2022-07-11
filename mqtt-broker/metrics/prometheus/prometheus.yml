@@ -1,0 +1,13 @@
+# https://prometheus.io/docs/prometheus/latest/configuration/configuration/
+global:
+  # https://www.robustperception.io/what-range-should-i-use-with-rate
+  scrape_interval: 15s # Default is every 1 minute.
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+  - job_name: 'rabbitmq-server'
+    static_configs:
+      - targets:
+          - 'mqtt-broker:15692'
