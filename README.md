@@ -28,7 +28,7 @@ At the time of release, the previous software should continue working as-is; how
 
 It's possible to run the server:
 
- - directly on a host system using `node` v12+; or,
+ - directly on a host system using `node` v14+; or,
  - through a `Docker` container.
 
 > _**NOTE:** The instructions for each are nearly identical. This guide describes `node`;
