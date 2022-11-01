@@ -34,6 +34,8 @@ It's possible to run the server:
 > _**NOTE:** The instructions for each are nearly identical. This guide describes `node`;
 scripts are provided in `connect/container` that support the `Docker` method._
 
+
+
 ##### Estimated Time (TOTAL): 5–10 minutes
 ##### Overview of steps are:
 
@@ -113,5 +115,11 @@ When running _Frame_ and _Lattice Connect_ on the same computer, use `localhost`
 
 ## FAQ
 
+### What do I need to do migrate from `v1`?
+Nothing. If you've made changes from `SSH`, they will be ignored by `v2`. To fully revert them: reset your router in the Lattice<sup>1</sup> System Settings (if you're using Wi-Fi, you'll be required to reconnect).
+
 ### Can I use _Lattice Connect_ with MetaMask?
+If you're setting up _Lattice Connect_ for the first time, we highly recommend using Frame. MetaMask setup is possible, though more involved. Specific instructions will be added soon.
+
 ### How do I connect more than one Lattice<sup>1</sup>?
+Currently, the direct method supports a single Lattice<sup>1</sup> at a time.
