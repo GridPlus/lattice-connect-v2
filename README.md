@@ -4,11 +4,13 @@
 This open-source project provides [Lattice<sup>1</sup>](https://gridplus.io/lattice) owners a HTTP server which they manage themselves, and that will proxy all messages between the device over their own local network, as an alternative to relying on the vendor-provided routing service. 
 
 By default, communication between apps and a Lattice<sup>1</sup> route through cloud infrastructure provided by [GridPlus](https://gridplus.io). Any messages sent to, and from, your device will always be encrypted and remain secure; however, we believe Lattice<sup>1</sup> owners should be able to manage this service themselves, if they so choose.
+
 ### 🔗 Related Links
  - [📢 Discord](https://twitter.com/gridplus)
  - [🐤 Twitter](https://discord.gg/Bt5fVDTJb9)
  - [📚 Knowledge Base](https://docs.gridplus.io)
 &nbsp;
+
 ## 🤔 Why use Lattice Connect?
 
 Running _Lattice Connect_ yourself provides several advantages:
@@ -34,7 +36,15 @@ It's possible to run the server:
 > _**NOTE:** The instructions for each are nearly identical. This guide describes `node`;
 scripts are provided in `connect/container` that support the `Docker` method._
 
+### System Requirements
 
+Besides the runtime requirements, as a proxy server, the system resources as trivial. It will work on any system which can run Node v14+, or Docker.
+
+The server has been tested on:
+
+ - macOS v10.12;
+ - Ubuntu 18.04;
+ - Windows 10
 
 ##### Estimated Time (TOTAL): 5–10 minutes
 ##### Overview of steps are:
@@ -43,8 +53,10 @@ scripts are provided in `connect/container` that support the `Docker` method._
  2. Downloading, and installing, _[Frame](https://frame.sh)_; and,
  3. Setting your _Lattice Relayer_ host in _Frame_; and,
  4. Connecting your Lattice<sup>1</sup> to the _Frame_ app.
-## ▶️ Configuring & Running
-#### Get the source code
+
+## ⚙️ Configuring
+
+#### 1️⃣ Get the source code
 Clone the repo to the server or computer you plan to run it on:
 
  ```sh
@@ -55,7 +67,7 @@ $ git clone https://github.com/GridPlus/lattice-connect-v2.git
 $ cd lattice-connect-v2/connect
 ```
 
-#### Configure the environment
+#### 2️⃣ Configure the environment
 Edit `connect/.direct.env` and set your device's hostname: 
 
 ```sh
@@ -63,14 +75,15 @@ Edit `connect/.direct.env` and set your device's hostname:
 # - Replace this with your device's hostname 
 ADMIN_CLIENT_HOST=http://GridPlus-xxxxxxxxxxx.local 
 ```
-##### Checking your device's hostname
+##### 🔍 Checking your device's hostname
 On Firmware v16, and above, the device's hostname is shown with the following steps:
 
  1. **Unlock** the device; then,
  2. Tap **System Preferences**; then,
  3. Tap **Device Info**; then,
  4. See `SSH Host`.
-#### Build and start the server
+
+## 🌐 Start Proxy: Using Node
 From inside `connect` folder, run: 
 
 ```sh
@@ -86,13 +99,37 @@ $ npm run start:direct
 
 <img src="assets/start-direct.gif" />
 
-##### Troubleshooting 
+## 🐬 Start Proxy: Using Docker
+From inside the `connect/container` folder, run:
+
+```sh
+# Script to build the container
+$ ./dockerBuilder.sh
+
+# Script to start the proxy server
+$ ./dockerStart.sh
+```
+
+## 🔬 Troubleshooting 
 
 If the server fails to connect:
 
  - Double-check your `ADMIN_CLIENT_HOST` value;
  - Ensure `.local` is included as as suffix on the host;
- - `ping` your device; be certain your device is reachable outside this context.
+ - `ping` your device; be certain your device is reachable outside this context;
+ - instead of the Lattice<sup>1</sup> hostname, use its IP address
+ 
+### Using IP Address
+For many of the most common network setups, the server should have no trouble finding, and connecting, to the Lattice<sup>1</sup>. However, if it's unable to connect—and you're certain you've inputted the `<HOSTNAME>.local` correct—try setting the device's IP address instead of its hostname:
+
+```sh
+# - Open the '.direct.env' file; then,
+# - Replace this with your device's IP address
+# - don't include '.local'; it's standard IPv4 format.
+ADMIN_CLIENT_HOST=http://<IP_ADDRESS>
+```
+
+The IP address of the device can be determined from your network's main router or gateway appliance, and **is outside the scope of this document**. You can SSH into the device which you know can find it via the hostname, then type `ifconfig` and review the IP address information for the WiFi adapter.
 
 ## 🖼 Frame Wallet
 
@@ -116,7 +153,9 @@ When running _Frame_ and _Lattice Connect_ on the same computer, use `localhost`
 ## FAQ
 
 ### What do I need to do migrate from `v1`?
-Nothing. If you've made changes from `SSH`, they will be ignored by `v2`. To fully revert them: reset your router in the Lattice<sup>1</sup> System Settings (if you're using Wi-Fi, you'll be required to reconnect).
+Nothing. If you've made changes from `SSH`, they will be ignored by `v2`. 
+
+If you're adament about having factory settings, you may reset your router in the Lattice<sup>1</sup> System Settings. Please be aware doing this will also reset your wireless routing settings, and will require reconnecting to your Wi-Fi network.
 
 ### Can I use _Lattice Connect_ with MetaMask?
 If you're setting up _Lattice Connect_ for the first time, we highly recommend using Frame. MetaMask setup is possible, though more involved. Specific instructions will be added soon.
