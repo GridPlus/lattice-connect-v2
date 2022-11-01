@@ -104,7 +104,7 @@ From inside the `connect/container` folder, run:
 
 ```sh
 # Script to build the container
-$ ./dockerBuilder.sh
+$ ./dockerBuild.sh
 
 # Script to start the proxy server
 $ ./dockerStart.sh
