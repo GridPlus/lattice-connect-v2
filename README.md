@@ -38,7 +38,7 @@ scripts are provided in `connect/container` that support the `Docker` method._
 
 ### System Requirements
 
-Besides the runtime requirements, as a proxy server, the system resources as trivial. It will work on any system which can run Node v14+, or Docker.
+Besides the runtime requirements, the system resources for the proxy server are trivial. It will work on any system which can run Node v14+, or Docker.
 
 The server has been tested on:
 
