@@ -117,7 +117,8 @@ If the server fails to connect:
  - Double-check your `ADMIN_CLIENT_HOST` value;
  - Ensure `.local` is included as as suffix on the host;
  - `ping` your device; be certain your device is reachable outside this context;
- - instead of the Lattice<sup>1</sup> hostname, use its IP address
+ - instead of the Lattice<sup>1</sup> hostname, use its IP address (see below);
+ - be sure your network's firewall isn't blocking port 1883.
  
 ### Using IP Address
 For many of the most common network setups, the server should have no trouble finding, and connecting, to the Lattice<sup>1</sup>. However, if it's unable to connect—and you're certain you've inputted the `<HOSTNAME>.local` correct—try setting the device's IP address instead of its hostname:
