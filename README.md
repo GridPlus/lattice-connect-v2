@@ -99,7 +99,7 @@ $ npm run start:direct
 
 <img src="assets/start-direct.gif" />
 
-## 🐬 Start Proxy: Using Docker
+## 🐳 Start Proxy: Using Docker
 From inside the `connect/container` folder, run:
 
 ```sh
