@@ -153,7 +153,7 @@ When running _Frame_ and _Lattice Connect_ on the same computer, use `localhost`
 
 ## FAQ
 
-### What do I need to do migrate from `v1`?
+### What do I need to do to migrate from `v1`?
 Nothing. If you've made changes from `SSH`, they will be ignored by `v2`. 
 
 If you're adament about having factory settings, you may reset your router in the Lattice<sup>1</sup> System Settings. Please be aware doing this will also reset your wireless routing settings, and will require reconnecting to your Wi-Fi network.
