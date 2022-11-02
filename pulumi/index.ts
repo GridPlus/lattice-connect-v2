@@ -59,6 +59,12 @@ const amazonIssuedSSLCert = pulumi.output(aws.acm.getCertificate({
   types: ["AMAZON_ISSUED"],
 }));
 
+const listenerSSLCert = pulumi.output(aws.acm.getCertificate({
+  domain: "connect.gridpl.us",
+  mostRecent: true,
+  types: ["AMAZON_ISSUED"],
+}))
+
 const loadBalancer = new awsx.lb
   .NetworkLoadBalancer("lattice-connect-mqtt-lb", { vpc })
 
@@ -147,5 +153,15 @@ appTaskDefinition.apply(task =>
     taskDefinition: task
   })
 )
+
+const mqttListenerCertificate = new aws.lb.ListenerCertificate("lattice-connect-mqtt-SNI", {
+  listenerArn: mqttSSLTCPListener.listener.arn,
+  certificateArn: listenerSSLCert.arn
+})
+
+const appListenerCertificate = new aws.lb.ListenerCertificate("lattice-connect-app-SNI", {
+  listenerArn: appServiceListener.listener.arn,
+  certificateArn: listenerSSLCert.arn
+})
 
 export const appDnsName = loadBalancer.loadBalancer.dnsName
