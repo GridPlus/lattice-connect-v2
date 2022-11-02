@@ -130,7 +130,7 @@ For many of the most common network setups, the server should have no trouble fi
 ADMIN_CLIENT_HOST=http://<IP_ADDRESS>
 ```
 
-The IP address of the device can be determined from your network's main router or gateway appliance. You may SSH into the device which you've confirmed can find/connect to the device via the hostname, and—after SSH'ing in—type `ifconfig` and review the IP address information for the WiFi adapter.
+The IP address of the device can be determined from your network's main router or gateway appliance. Details on how to do vary depending on your specific appliance, and is outside the scope of this document.
 
 ## 🖼 Frame Wallet
 
