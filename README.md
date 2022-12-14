@@ -150,7 +150,7 @@ Download the [MetaMask](https://metamask.io) extension if you don't have it alre
 5. In the **Settings** tab input the `http://<RELAY_HOST>:8080` into the **Connection Endpoint** field.
 
 Replace `<RELAY_HOST>` with the host running _Lattice Connect_.
-When running _Lattice Connect_ on the same computer you are using MetaMask, use `localhost`:
+When running _Lattice Connect_ on the same computer you are using MetaMask, use `localhost`, otherwise use `http://<IP address>:8080` where `<IP address>` is the IP of the machine running **Lattice Connect**.
 
 <img width="575" alt="Screenshot 2022-12-14 at 10 36 38 AM" src="https://user-images.githubusercontent.com/43481545/207657406-bcbaf5df-1961-4eba-b29a-01632db6a817.png">
 
@@ -182,9 +182,6 @@ When running _Frame_ and _Lattice Connect_ on the same computer, use `localhost`
 Nothing. If you've made changes from `SSH`, they will be ignored by `v2`. 
 
 If you're adament about having factory settings, you may reset your router in the Lattice<sup>1</sup> System Settings. Please be aware doing this will also reset your wireless routing settings, and will require reconnecting to your Wi-Fi network.
-
-### Can I use _Lattice Connect_ with MetaMask?
-If you're setting up _Lattice Connect_ for the first time, we highly recommend using Frame. MetaMask setup is possible, though more involved. Specific instructions will be added soon.
 
 ### How do I connect more than one Lattice<sup>1</sup>?
 Currently, the direct method supports a single Lattice<sup>1</sup> at a time.
