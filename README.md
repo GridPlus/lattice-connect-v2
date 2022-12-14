@@ -147,7 +147,7 @@ Download the [MetaMask](https://metamask.io) extension if you don't have it alre
 4. Log into the [Lattice Manager](https://lattice.gridplus.io) and remove any MetaMask entries from the **3rd Party Connections** list if present. 
 <img width="473" alt="Screenshot 2022-12-14 at 10 45 43 AM" src="https://user-images.githubusercontent.com/43481545/207657354-acf18059-3199-4d9b-8026-cea2844678d1.png">
 
-5. Input the `http://<RELAY_HOST>:8080` into the **Connection Endpoint** field.
+5. In the **Settings** tab input the `http://<RELAY_HOST>:8080` into the **Connection Endpoint** field.
 
 Replace `<RELAY_HOST>` with the host running _Lattice Connect_.
 When running _Lattice Connect_ on the same computer you are using MetaMask, use `localhost`:
