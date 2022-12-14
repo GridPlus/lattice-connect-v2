@@ -140,10 +140,12 @@ Download the [MetaMask](https://metamask.io) extension if you don't have it alre
 
 #### Set the Lattice Relay
 
-1. Start by removing all **Lattice1** accounts from MetaMask if present.<img width="321" alt="Screenshot 2022-12-14 at 10 38 44 AM" src="https://user-images.githubusercontent.com/43481545/207657312-37b4e1ea-57bc-495b-981d-63e008529547.png">
+1. Start by removing all **Lattice1** accounts from MetaMask if present.
+<img width="321" alt="Screenshot 2022-12-14 at 10 38 44 AM" src="https://user-images.githubusercontent.com/43481545/207657312-37b4e1ea-57bc-495b-981d-63e008529547.png">
 
 3. Remove the MetaMask permission from your Lattice1 if present.
-4. Log into the [Lattice Manager](https://lattice.gridplus.io) and remove any MetaMask entries from the **3rd Party Connections** list if present. <img width="473" alt="Screenshot 2022-12-14 at 10 45 43 AM" src="https://user-images.githubusercontent.com/43481545/207657354-acf18059-3199-4d9b-8026-cea2844678d1.png">
+4. Log into the [Lattice Manager](https://lattice.gridplus.io) and remove any MetaMask entries from the **3rd Party Connections** list if present. 
+<img width="473" alt="Screenshot 2022-12-14 at 10 45 43 AM" src="https://user-images.githubusercontent.com/43481545/207657354-acf18059-3199-4d9b-8026-cea2844678d1.png">
 
 5. Input the `http://<RELAY_HOST>:8080` into the **Connection Endpoint** field.
 
