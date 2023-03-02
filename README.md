@@ -1,9 +1,12 @@
 <img src="assets/banner.png" />
 
 # 👋 Introduction
-This open-source project provides [Lattice<sup>1</sup>](https://gridplus.io/lattice) owners a HTTP server which they manage themselves, and that will proxy all messages between the device over their own local network, as an alternative to relying on the vendor-provided routing service. 
 
-By default, communication between apps and a Lattice<sup>1</sup> route through cloud infrastructure provided by [GridPlus](https://gridplus.io). Any messages sent to, and from, your device will always be encrypted and remain secure; however, we believe Lattice<sup>1</sup> owners should be able to manage this service themselves, if they so choose.
+By default, [Lattice1](https://gridplus.io/lattice) devices are configured to use GridPlus' cloud services to connect apps and route messages. However, **Lattice Connect V2** allows you to disconnect your Lattice1 from the GridPlus cloud and run the services locally instead. Note that your Lattice1 still needs to be on your WiFi network in order to route local messages, as Lattice Connect V2 runs on your computer and thus must connect to your Lattice1 over LAN.
+
+This open-source project provides [Lattice1](https://gridplus.io/lattice) owners a HTTP server which they manage themselves, and that will proxy all messages between the device over their own local network, as an alternative to relying on the vendor-provided routing service. 
+
+By default, communication between apps and a Lattice1 route through cloud infrastructure provided by [GridPlus](https://gridplus.io). Any messages sent to, and from, your device will always be encrypted and remain secure; however, we believe Lattice1 owners should be able to manage this service themselves, if they so choose.
 
 ### 🔗 Related Links
  - [📢 Discord](https://twitter.com/gridplus)
@@ -16,8 +19,8 @@ By default, communication between apps and a Lattice<sup>1</sup> route through c
 Running _Lattice Connect_ yourself provides several advantages:
 
  - Doesn't requires running an external MQTT broker (compared to `v1`);
- - Offers the fastest message routing possible for a Lattice<sup>1</sup>;
- - Provides the highest amount of privacy available while using a Lattice<sup>1</sup>;
+ - Offers the fastest message routing possible for a Lattice1;
+ - Provides the highest amount of privacy available while using a Lattice1
  - Zero configuration changes required (i.e., no SSH'ing necessary);
  - Setup takes less than 5 minutes!
 
@@ -27,6 +30,8 @@ This project replaces the original _[lattice-connect](https://github.com/GridPlu
 At the time of release, the previous software should continue working as-is; however, GridPlus will no longer offer technical support, or otherwise provide maintenance for the prior version. Thus, breaking changes that may occur as we continue improving our customers' user experience should be expected, and switching to `v2` as soon as possible is highly recommended.
 
 # ⌛️ Setup Guide
+
+##### Estimated Time (TOTAL): 5–10 minutes
 
 It's possible to run the server:
 
@@ -45,16 +50,6 @@ The server has been tested on:
  - macOS v10.12;
  - Ubuntu 18.04;
  - Windows 10
-
-### Overview
-
-##### Estimated Time (TOTAL): 5–10 minutes
-##### Overview of steps are:
-
- 1. Configuring, then running, `lattice-connect-v2`; and,
- 2. Downloading, and installing, _[Frame](https://frame.sh)_; and,
- 3. Setting your _Lattice Relayer_ host in _Frame_; and,
- 4. Connecting your Lattice<sup>1</sup> to the _Frame_ app.
 
 ## ⚙️ Configuring
 
@@ -119,7 +114,7 @@ If the server fails to connect:
  - Double-check your `ADMIN_CLIENT_HOST` value;
  - Ensure `.local` is included as a suffix on the host;
  - `ping` your device, being certain your device is reachable before trying to run this software;
- - use the Lattice<sup>1</sup> IP address as an alternative to hostname (see below);
+ - use the Lattice1 IP address as an alternative to hostname (see below);
  - be sure your network's firewall isn't blocking port 1883.
  
 ### Using IP Address
@@ -133,6 +128,23 @@ ADMIN_CLIENT_HOST=http://<IP_ADDRESS>
 ```
 
 > _**NOTE:** The IP address of the device can be determined from your network's main router or gateway appliance. Details on how to do this vary depending on your specific router or gateway appliance, and is outside the scope of this document._
+
+# ✌️ Disconnecting Entirely from the GridPlus Cloud
+
+If you are using Lattice Connect V2 to route messages, your device will not use the GridPlus cloud, but will still be connected to it. If you would like to remove **all** connections to the GridPlus cloud, you will also need to erase some system settings and configure a custom device ID. Note that if you choose to do this, you will need to re-connect with all of your apps using the new device ID.
+
+1. SSH into the Lattice (you can find credentials in `System Preferences -> Device Info` -- format the request like so: `ssh root@<SSH Host>.local`)
+2. Stop current processes: `service gpd stop && service mosquitto stop`
+3. Update credentials<sup>&dagger;</sup>: `uci set gridplus.provisionLatticeAPIURL="" && uci set gridplus.deviceID="ABCDEF" && uci set gridplus.remote_mqtt_address="foo" && uci commit`
+4. Restart processes: `service gpd restart && service mosquitto restart`
+
+Give it ~30 seconds and view the `Device ID` on your Lattice menu. You should see the device ID you just configured -- this new device ID indicates that you have disconnected your Lattice from GridPlus cloud services.
+
+<sup>&dagger;</sup> Note that you can set whatever `deviceID` credential you want, but you should probably use six characters to avoid any edge cases. Also note that `remote_mqtt_address` is not used when Lattice Connect V2 is routing messages, but it can't be empty or else `mosquitto` will fail to start.
+
+# 🔗 Connecting to Third Party Apps
+
+Now that Lattice Connect V2 is running on your computer, you will need to update your connections to third party apps, which may involve removing the Permission on your Lattice1 device. This section covers the most common connections: [MetaMask](https://metamask.io) and [Frame](https://frame.sh).
 
 ## 🖼 MetaMask
 
@@ -181,7 +193,7 @@ When running _Frame_ and _Lattice Connect_ on the same computer, use `localhost`
 ### What do I need to do to migrate from `v1`?
 Nothing. If you've made changes from `SSH`, they will be ignored by `v2`. 
 
-If you're adament about having factory settings, you may reset your router in the Lattice<sup>1</sup> System Settings. Please be aware doing this will also reset your wireless routing settings, and will require reconnecting to your Wi-Fi network.
+If you're adament about having factory settings, you may reset your router in the Lattice1 System Settings. Please be aware doing this will also reset your wireless routing settings, and will require reconnecting to your Wi-Fi network.
 
-### How do I connect more than one Lattice<sup>1</sup>?
-Currently, the direct method supports a single Lattice<sup>1</sup> at a time.
+### How do I connect more than one Lattice1?
+Currently, the direct method supports a single Lattice1 at a time.
