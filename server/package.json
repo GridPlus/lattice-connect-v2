@@ -7,7 +7,7 @@
     "start:mqtt": "DEBUG='mqttjs*' NODE_ENV=development nodemon ./src/index.ts",
     "start:direct": "nodemon ./src/direct.ts",
     "start:direct:mqtt": "DEBUG='mqttjs*' NODE_ENV=development nodemon ./src/direct.ts",
-    "prod": "tsc --build tsconfig.json; NODE_ENV=production node ./dist/index.js"
+    "build": "tsc"
   },
   "dependencies": {
     "async-mqtt": "^2.6.2",

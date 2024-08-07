@@ -1,0 +1,28 @@
+version: "3"
+
+services:
+  rabbitmq:
+    build:
+      context: ./mqtt-broker
+      dockerfile: Dockerfile
+    ports:
+      - "1883:1883" # MQTT port
+      - "15672:15672" # Management UI port
+    volumes:
+      - ./rabbitmq/data:/var/lib/rabbitmq
+    environment:
+      - MQTT_DEFAULT_USER=guest
+      - MQTT_DEFAULT_PASS=guest
+
+  nodejs:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080" # Assuming your Node.js app runs on port 3000
+    depends_on:
+      - rabbitmq
+    environment:
+      - ADMIN_CLIENT_HOST=${ADMIN_CLIENT_HOST}
+      - ADMIN_CLIENT_USER=${ADMIN_CLIENT_USER}
+      - ADMIN_CLIENT_PASS=${ADMIN_CLIENT_PASS}

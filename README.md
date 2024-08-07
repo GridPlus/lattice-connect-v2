@@ -8,24 +8,26 @@ This open-source project provides [Lattice1](https://gridplus.io/lattice) owners
 
 By default, communication between apps and a Lattice1 route through cloud infrastructure provided by [GridPlus](https://gridplus.io). Any messages sent to, and from, your device will always be encrypted and remain secure; however, we believe Lattice1 owners should be able to manage this service themselves, if they so choose.
 
-### 🔗 Related Links
- - [📢 Discord](https://twitter.com/gridplus)
- - [🐤 Twitter](https://discord.gg/Bt5fVDTJb9)
- - [📚 Knowledge Base](https://docs.gridplus.io)
-&nbsp;
+## 🔗 Related Links
+
+- [📢 Discord](https://twitter.com/gridplus)
+- [🐤 Twitter](https://discord.gg/Bt5fVDTJb9)
+- [📚 Knowledge Base](https://docs.gridplus.io)
+&nbsp; 
 
 ## 🤔 Why use Lattice Connect?
 
-Running _Lattice Connect_ yourself provides several advantages:
+Running *Lattice Connect* yourself provides several advantages:
 
- - Doesn't requires running an external MQTT broker (compared to `v1`);
- - Offers the fastest message routing possible for a Lattice1;
- - Provides the highest amount of privacy available while using a Lattice1
- - Zero configuration changes required (i.e., no SSH'ing necessary);
- - Setup takes less than 5 minutes!
+- Doesn't requires running an external MQTT broker (compared to `v1` ); 
+- Offers the fastest message routing possible for a Lattice1; 
+- Provides the highest amount of privacy available while using a Lattice1
+- Zero configuration changes required (i.e., no SSH'ing necessary); 
+- Setup takes less than 5 minutes!
 
-## 🚨 What about `v1`?
-This project replaces the original _[lattice-connect](https://github.com/GridPlus/lattice-connect)_, which is now archived. 
+## 🚨 What about `v1` ?
+
+This project replaces the original *[lattice-connect](https://github.com/GridPlus/lattice-connect)*, which is now archived. 
 
 At the time of release, the previous software should continue working as-is; however, GridPlus will no longer offer technical support, or otherwise provide maintenance for the prior version. Thus, breaking changes that may occur as we continue improving our customers' user experience should be expected, and switching to `v2` as soon as possible is highly recommended.
 
@@ -35,10 +37,11 @@ At the time of release, the previous software should continue working as-is; how
 
 It's possible to run the server:
 
- - directly on a host system using `node` v14+; or,
- - through a `Docker` container.
+- directly on a host system using `node` v14+; or, 
+- through a `Docker` container.
 
-> _**NOTE:** The instructions for each are nearly identical. This guide describes `node`;
+> _**NOTE:** The instructions for each are nearly identical. This guide describes `node` ; 
+
 scripts are provided in `connect/container` that support the `Docker` method._
 
 ### System Requirements
@@ -47,16 +50,17 @@ Besides the runtime requirements, the system resources for the proxy server are 
 
 The server has been tested on:
 
- - macOS v10.12;
- - Ubuntu 18.04;
- - Windows 10
+- macOS v10.12; 
+- Ubuntu 18.04; 
+- Windows 10
 
 ## ⚙️ Configuring
 
 #### 1️⃣ Get the source code
+
 Clone the repo to the server or computer you plan to run it on:
 
- ```sh
+```sh
  # Clone the repo:
 $ git clone https://github.com/GridPlus/lattice-connect-v2.git
 
@@ -65,6 +69,7 @@ $ cd lattice-connect-v2/connect
 ```
 
 #### 2️⃣ Configure the environment
+
 Edit `connect/.direct.env` and set your device's hostname: 
 
 ```sh
@@ -72,15 +77,18 @@ Edit `connect/.direct.env` and set your device's hostname:
 # - Replace this with your device's hostname 
 ADMIN_CLIENT_HOST=http://GridPlus-xxxxxxxxxxx.local 
 ```
+
 ##### 🔍 Checking your device's hostname
+
 On Firmware v16, and above, the device's hostname is shown with the following steps:
 
- 1. **Unlock** the device; then,
- 2. Tap **System Preferences**; then,
- 3. Tap **Device Info**; then,
- 4. See `SSH Host`.
+ 1. **Unlock** the device; then, 
+ 2. Tap **System Preferences**; then, 
+ 3. Tap **Device Info**; then, 
+ 4. See `SSH Host` .
 
 ## 🌐 Start Proxy: Using Node
+
 From inside `connect` folder, run: 
 
 ```sh
@@ -97,6 +105,7 @@ $ npm run start:direct
 <img src="assets/start-direct.gif" />
 
 ## 🐳 Start Proxy: Using Docker
+
 From inside the `connect/container` folder, run:
 
 ```sh
@@ -111,13 +120,14 @@ $ ./dockerStart.sh
 
 If the server fails to connect:
 
- - Double-check your `ADMIN_CLIENT_HOST` value;
- - Ensure `.local` is included as a suffix on the host;
- - `ping` your device, being certain your device is reachable before trying to run this software;
- - use the Lattice1 IP address as an alternative to hostname (see below);
- - be sure your network's firewall isn't blocking port 1883.
+- Double-check your `ADMIN_CLIENT_HOST` value; 
+- Ensure `.local` is included as a suffix on the host; 
+- `ping` your device, being certain your device is reachable before trying to run this software; 
+- use the Lattice1 IP address as an alternative to hostname (see below); 
+- be sure your network's firewall isn't blocking port 1883.
  
 ### Using IP Address
+
 For many of the most common network setups, the server should have no trouble finding, and connecting, to the Lattice<sup>1</sup>. However, if it's unable to connect—and you're certain you've inputted the `<HOSTNAME>.local` correct—use the device's IP address instead:
 
 ```sh
@@ -127,7 +137,7 @@ For many of the most common network setups, the server should have no trouble fi
 ADMIN_CLIENT_HOST=http://<IP_ADDRESS>
 ```
 
-> _**NOTE:** The IP address of the device can be determined from your network's main router or gateway appliance. Details on how to do this vary depending on your specific router or gateway appliance, and is outside the scope of this document._
+> ***NOTE:** The IP address of the device can be determined from your network's main router or gateway appliance. Details on how to do this vary depending on your specific router or gateway appliance, and is outside the scope of this document.*
 
 # ✌️ Disconnecting Entirely from the GridPlus Cloud
 
@@ -140,7 +150,7 @@ If you are using Lattice Connect V2 to route messages, your device will not use 
 
 Give it ~30 seconds and view the `Device ID` on your Lattice menu. You should see the device ID you just configured -- this new device ID indicates that you have disconnected your Lattice from GridPlus cloud services.
 
-<sup>&dagger;</sup> Note that you can set whatever `deviceID` credential you want, but you should probably use six characters to avoid any edge cases. Also note that `remote_mqtt_address` is not used when Lattice Connect V2 is routing messages, but it can't be empty or else `mosquitto` will fail to start.
+<sup>&dagger; </sup> Note that you can set whatever `deviceID` credential you want, but you should probably use six characters to avoid any edge cases. Also note that `remote_mqtt_address` is not used when Lattice Connect V2 is routing messages, but it can't be empty or else `mosquitto` will fail to start.
 
 # 🔗 Connecting to Third Party Apps
 
@@ -161,13 +171,12 @@ Download the [MetaMask](https://metamask.io) extension if you don't have it alre
 
 5. In the **Settings** tab input the `http://<RELAY_HOST>:8080` into the **Connection Endpoint** field.
 
-Replace `<RELAY_HOST>` with the host running _Lattice Connect_.
-When running _Lattice Connect_ on the same computer you are using MetaMask, use `localhost`, otherwise use `http://<IP address>:8080` where `<IP address>` is the IP of the machine running **Lattice Connect**.
+Replace `<RELAY_HOST>` with the host running *Lattice Connect*.
+When running *Lattice Connect* on the same computer you are using MetaMask, use `localhost` , otherwise use `http://<IP address>:8080` where `<IP address>` is the IP of the machine running **Lattice Connect**.
 
 <img width="575" alt="Screenshot 2022-12-14 at 10 36 38 AM" src="https://user-images.githubusercontent.com/43481545/207657406-bcbaf5df-1961-4eba-b29a-01632db6a817.png">
 
 6. Connect your Lattice to MetaMask as normal. Transaction requests will now be routed to your self-hosted endpoint.
-
 
 ## 🖼 Frame Wallet
 
@@ -177,23 +186,25 @@ When running _Lattice Connect_ on the same computer you are using MetaMask, use 
 
 #### Set the Lattice Relay
 
-From the _Settings_ panel (upper-right; slider icon):
+From the *Settings* panel (upper-right; slider icon):
 
- - Scroll down to the **Lattice Relay** option; then,
- - Click _Default_; switch to _Custom_; then,
- - Input the `http://<RELAY_HOST>:8080`
+- Scroll down to the **Lattice Relay** option; then, 
+- Click *Default*; switch to *Custom*; then, 
+- Input the `http://<RELAY_HOST>:8080`
 
-Replace `RELAY_HOST` with the host running _Lattice Connect_.
-When running _Frame_ and _Lattice Connect_ on the same computer, use `localhost`:
+Replace `RELAY_HOST` with the host running *Lattice Connect*.
+When running *Frame* and *Lattice Connect* on the same computer, use `localhost` :
 
 <img src="assets/lattice-relay.png" />
 
 ## FAQ
 
-### What do I need to do to migrate from `v1`?
-Nothing. If you've made changes from `SSH`, they will be ignored by `v2`. 
+### What do I need to do to migrate from `v1` ?
+
+Nothing. If you've made changes from `SSH` , they will be ignored by `v2` . 
 
 If you're adament about having factory settings, you may reset your router in the Lattice1 System Settings. Please be aware doing this will also reset your wireless routing settings, and will require reconnecting to your Wi-Fi network.
 
 ### How do I connect more than one Lattice1?
+
 Currently, the direct method supports a single Lattice1 at a time.

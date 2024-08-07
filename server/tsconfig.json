@@ -43,8 +43,8 @@
     // "noPropertyAccessFromIndexSignature": true,  /* Require undeclared properties from index signatures to use element accesses. */
 
     /* Module Resolution Options */
-    "moduleResolution": "node",                     /* Specify module resolution strategy: 'node' (Node.js) or 'classic' (TypeScript pre-1.6). */
-    "resolveJsonModule": true,                      /* Allows importing modules with a ‘.json’ extension, which is a common practice in node projects. */
+    "moduleResolution": "node" /* Specify module resolution strategy: 'node' (Node.js) or 'classic' (TypeScript pre-1.6). */,
+    "resolveJsonModule": true /* Allows importing modules with a ‘.json’ extension, which is a common practice in node projects. */,
     // "baseUrl": "./",                             /* Base directory to resolve non-absolute module names. */
     // "paths": {},                                 /* A series of entries which re-map imports to lookup locations relative to the 'baseUrl'. */
     // "rootDirs": [],                              /* List of root folders whose combined content represents the structure of the project at runtime. */
@@ -71,6 +71,6 @@
     "skipLibCheck": true /* Skip type checking of declaration files. */,
     "forceConsistentCasingInFileNames": true /* Disallow inconsistently-cased references to the same file. */
   },
-  "include": ["src", "index.*"],
+  "include": ["src"],
   "exclude": ["node_modules", "**/*.spec.ts", "**/*.test.ts"]
 }
