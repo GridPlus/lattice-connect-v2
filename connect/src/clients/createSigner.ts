@@ -27,8 +27,8 @@ export function createSigner(config: IClientOptions, logger?: any): { signer: IS
   //--------------------------------------------------------------------------------
   // TOPICS: 'TO Agent (Publish)' & 'FROM Agent (Subscribe)'
   //--------------------------------------------------------------------------------
-  const publishTopic = (deviceId, requestId) => `to_agent/${deviceId}/request/${requestId}`
-  const subscribeTopic = (deviceId, requestId) => `from_agent/${deviceId}/response/${requestId}`
+  const publishTopic = (deviceId: string, requestId: string) => `to_agent/${deviceId}/request/${requestId}`
+  const subscribeTopic = (deviceId: string, requestId: string) => `from_agent/${deviceId}/response/${requestId}`
 
   //--------------------------------------------------------------------------------
   // EVENT: 'Connect'

@@ -18,7 +18,7 @@ export async function startServer({ worker, config }: {
    * It resolves once it begins listening; it rejects once 'server' receives its
    * first (and only) error, at which time the 'server' calls 'close()'.
    */
-  const createServer = ({ app, logger }) => {
+  const createServer = ({ app, logger }: { app: any, logger: any }) => {
     return new Promise<{ app: any, logger: any }>((resolve, rejected) => {
       //------------------------------------------------------------------------------
       // HTTP: Create 'Server'
