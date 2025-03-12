@@ -661,6 +661,6 @@ export function useEIP1193Provider(service: IAppService) {
   };
 
   // Register endpoints
-  app.post("/api/eip1193", connectHandler);
-  app.post("/api/eip1193/:deviceId", authenticateRequest, initializeMethodClient, requestHandler);
+  app.post("/api/v2/www", connectHandler);
+  app.post("/api/v2/www/:deviceId", authenticateRequest, initializeMethodClient, requestHandler);
 } 

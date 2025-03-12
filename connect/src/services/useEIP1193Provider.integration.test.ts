@@ -25,7 +25,7 @@ describe("useEIP1193Provider Integration Tests", () => {
   // Helper function to make authenticated requests
   const makeRequest = (method: string, deviceId: string, body: any) => {
     const req = request(app)
-      .post(`/api/eip1193${deviceId ? `/${deviceId}` : ''}`)
+      .post(`/api/v2/www${deviceId ? `/${deviceId}` : ''}`)
       .send(body);
     
     if (authToken) {
@@ -39,7 +39,7 @@ describe("useEIP1193Provider Integration Tests", () => {
   const connect = async () => {
     const appSecret = Utils.generateAppSecret(DEVICE_ID, APP_PASSWORD, APP_NAME);
     const response = await request(app)
-      .post('/api/eip1193')
+      .post('/api/v2/www')
       .send({ 
         deviceId: DEVICE_ID,
         name: APP_NAME,
@@ -113,7 +113,7 @@ describe("useEIP1193Provider Integration Tests", () => {
     // Setup WebSocket connection if not already connected
     if (!ws || ws.readyState !== WebSocket.OPEN) {
       const port = (server.address() as any).port;
-      ws = new WebSocket(`ws://localhost:${port}/api/eip1193/${DEVICE_ID}`);
+      ws = new WebSocket(`ws://localhost:${port}/api/v2/www/${DEVICE_ID}`);
       
       ws.on('message', (data: string) => {
         const event = JSON.parse(data);
@@ -195,7 +195,7 @@ describe("useEIP1193Provider Integration Tests", () => {
 
     it("should handle connection errors gracefully", async () => {
       const response = await request(app)
-        .post('/api/eip1193')
+        .post('/api/v2/www')
         .send({ 
           deviceId: "invalid_device_id",
           name: APP_NAME,
@@ -208,7 +208,7 @@ describe("useEIP1193Provider Integration Tests", () => {
 
     it("should handle unauthorized requests", async () => {
       const response = await request(app)
-        .post(`/api/eip1193/${DEVICE_ID}`)
+        .post(`/api/v2/www/${DEVICE_ID}`)
         .send({
           method: "eth_chainId",
           params: []
