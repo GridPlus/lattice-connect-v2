@@ -37,6 +37,7 @@
     "@types/serve-static": "^1.15.7",
     "@types/superagent": "^4.1.15",
     "@types/supertest": "^6.0.2",
+    "@types/ws": "^8.18.0",
     "concurrently": "^9.1.2",
     "jest": "^29.7.0",
     "nodemon": "^2.0.19",

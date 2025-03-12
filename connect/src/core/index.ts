@@ -24,3 +24,5 @@ export function startService(config: IAppConfig, useService: ((service: IAppServ
     }
   })
 }
+
+export * from './types';
