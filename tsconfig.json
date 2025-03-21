@@ -13,6 +13,6 @@
     "resolveJsonModule": true,
     "types": ["node", "jest"]
   },
-  "include": ["src/**/*"],
+  "include": ["connect/src/**/*"],
   "exclude": ["node_modules", "dist"]
 }

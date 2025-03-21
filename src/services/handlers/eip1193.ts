@@ -3,6 +3,8 @@ import { Client, Constants } from 'gridplus-sdk';
 import { HARDENED_OFFSET, MethodParams, SignatureResponse, StateData } from './types';
 import { formatTransaction, serializeTransaction } from './utils/transactions';
 import { randomBytes } from 'crypto';
+import { ISigningService } from './interfaces';
+import { RPCRequest } from './types';
 
 export function ensureHexString(
   value: string | SignatureResponse | null | undefined
@@ -169,3 +171,29 @@ export function handleEthSubscribe(params: MethodParams['eth_subscribe'], emitte
     subscriptionId,
   };
 }
+
+export const handleEIP1193Request = async (
+  client: Client,
+  request: RPCRequest<keyof MethodParams>,
+  state: StateData,
+  signingService: ISigningService
+): Promise<unknown> => {
+  switch (request.method) {
+    case 'eth_signTransaction':
+      return signingService.handleEthSignTransaction(client, request.params as MethodParams['eth_signTransaction']);
+    case 'eth_sign':
+    case 'personal_sign':
+      return signingService.handlePersonalSign(client, request.params as MethodParams['personal_sign'], request.method);
+    case 'eth_signTypedData':
+    case 'eth_signTypedData_v4':
+      return signingService.handleSignTypedData(client, request.params as MethodParams['eth_signTypedData']);
+    case 'eth_accounts':
+      return signingService.handleGetAccounts(client);
+    case 'eth_chainId':
+      return signingService.handleGetChainId(state);
+    case 'eth_subscribe':
+      return signingService.handleEthSubscribe(request.params as MethodParams['eth_subscribe']);
+    default:
+      throw new Error(`Method ${request.method} not supported`);
+  }
+};

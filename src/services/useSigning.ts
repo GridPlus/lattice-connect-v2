@@ -1,13 +1,11 @@
 require('dotenv').config();
 
 import { Request, Response, Router } from 'express';
-import { IAppService } from '../core';
 import { createClient } from '../clients/createClient';
-import crypto from 'crypto';
-import cluster from 'cluster';
 import { createSigner } from '../clients/createSigner';
-import { generateRequestId } from '../utils/requestId';
+import { IAppService } from '../core';
 import { getDeviceId } from '../utils/deviceId';
+import { generateRequestId } from '../utils/requestId';
 
 export function useSigning(service: IAppService) {
   const logger = service.logger;

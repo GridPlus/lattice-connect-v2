@@ -10,6 +10,9 @@ import {
   StateData,
   STATUS_CODES,
   WalletCall,
+  RPCRequest,
+  ChainConfig,
+  SendCallsRequest,
 } from './types';
 import { serializeTransaction } from './utils/transactions';
 import type { Address, TransactionSerializableLegacy } from 'viem';
@@ -212,3 +215,22 @@ export function handleGetCapabilities(
     capabilities,
   };
 }
+
+export const handleEIP5792Request = async (
+  client: Client,
+  request: RPCRequest<keyof MethodParams>,
+  state: StateData
+): Promise<unknown> => {
+  switch (request.method) {
+    case 'wallet_sendCalls':
+      return handleWalletSendCalls(client, request.params as MethodParams['wallet_sendCalls'], state);
+    case 'wallet_getCallStatus':
+      return handleWalletGetCallStatus(request.params as MethodParams['wallet_getCallStatus'], state);
+    case 'wallet_addEthereumChain':
+      return handleWalletAddEthereumChain(request.params as MethodParams['wallet_addEthereumChain'], state);
+    case 'wallet_getCapabilities':
+      return handleGetCapabilities(request.params as MethodParams['wallet_getCapabilities'], state);
+    default:
+      throw new Error(`Method ${request.method} not supported`);
+  }
+};

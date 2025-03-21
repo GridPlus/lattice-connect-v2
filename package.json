@@ -8,8 +8,9 @@
     "start:direct": "nodemon ./src/direct.ts",
     "start:direct:mqtt": "DEBUG='mqttjs*' NODE_ENV=development nodemon ./src/direct.ts",
     "prod": "tsc --build tsconfig.json; NODE_ENV=production node ./dist/index.js",
-    "test": "jest",
-    "test:integration": "jest --testMatch '**/src/**/*.integration.test.ts' --forceExit --detectOpenHandles",
+    "test": "NODE_ENV=test jest --testPathPattern=test\\.ts$ --testPathIgnorePatterns=integration\\.test\\.ts$",
+    "test:int": "NODE_ENV=test jest --testPathPattern=integration\\.test\\.ts$",
+    "test:all": "NODE_ENV=test jest",
     "docker:mqtt:up": "cd ../mqtt-broker && docker-compose up -d",
     "docker:mqtt:down": "cd ../mqtt-broker && docker-compose down",
     "pretest:integration:setup": "yarn docker:mqtt:up && sleep 5",
@@ -28,6 +29,8 @@
     "superagent": "^8.0.0"
   },
   "devDependencies": {
+    "@turnkey/api-key-stamper": "^0.4.4",
+    "@turnkey/http": "^2.21.0",
     "@types/body-parser": "^1.19.5",
     "@types/cors": "^2.8.12",
     "@types/express": "^5.0.0",
@@ -50,7 +53,8 @@
     "supertest": "^7.0.0",
     "ts-jest": "^29.2.6",
     "ts-node": "^10.9.2",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.2",
+    "viem": "^2.23.12"
   },
   "nodemonConfig": {
     "execMap": {

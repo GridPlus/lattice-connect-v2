@@ -8,7 +8,8 @@ import {
 } from '../eip1193';
 import { EthSignTransactionParams, TypedDataParams, SignRequestParams } from '../types';
 import { handleEIP1193Request } from '../eip1193';
-import { ISigningService } from '../types';
+import { ISigningService } from '../interfaces';
+import { MethodParams, StateData } from '../types';
 
 type SignData = {
   sig: {

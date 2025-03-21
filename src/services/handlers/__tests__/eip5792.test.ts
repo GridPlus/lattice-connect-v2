@@ -9,7 +9,7 @@ import {
 } from '../eip5792';
 import { StateData, STATUS_CODES, WalletPermission } from '../types';
 import { handleEIP5792Request } from '../eip5792';
-import { ISigningService } from '../types';
+import { ISigningService } from '../interfaces';
 
 jest.mock('../eip1193', () => ({
   handleEIP1193Request: jest.fn(),
