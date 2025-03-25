@@ -42,6 +42,15 @@ export function createApp(config: IAppConfig): Promise<{ app: IApp; logger: any 
     res.sendStatus(200);
   });
 
+  // Add a status endpoint for health checks
+  app.get('/status', (req, res) => {
+    res.json({
+      status: 'online',
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV,
+    });
+  });
+
   //@ts-ignore
   app.config = config;
 

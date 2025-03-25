@@ -1,21 +1,38 @@
 {
-  "name": "server",
+  "name": "lattice-connect-server",
   "private": true,
-  "version": "0.0.1",
+  "version": "0.1.0",
+  "description": "Node.js server for GridPlus Lattice1 connectivity",
+  "main": "dist/index.js",
   "scripts": {
-    "start": "NODE_ENV=development nodemon ./src/index.ts",
-    "start:mqtt": "DEBUG='mqttjs*' NODE_ENV=development nodemon ./src/index.ts",
-    "start:direct": "nodemon ./src/direct.ts",
-    "start:direct:mqtt": "DEBUG='mqttjs*' NODE_ENV=development nodemon ./src/direct.ts",
-    "prod": "tsc --build tsconfig.json; NODE_ENV=production node ./dist/index.js",
+    "start": "NODE_ENV=production node dist/index.js",
+    "dev": "NODE_ENV=development nodemon --exec ts-node src/index.ts",
+    "dev:mqtt": "DEBUG='mqttjs*' NODE_ENV=development nodemon --exec ts-node src/index.ts",
+    "dev:direct": "nodemon --exec ts-node src/direct.ts",
+    "dev:direct:mqtt": "DEBUG='mqttjs*' NODE_ENV=development nodemon --exec ts-node src/direct.ts",
+    "build": "tsc",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --ext .ts --fix",
+    "format": "prettier --write \"src/**/*.ts\"",
     "test": "NODE_ENV=test jest --testPathPattern=test\\.ts$ --testPathIgnorePatterns=integration\\.test\\.ts$",
     "test:int": "NODE_ENV=test jest --testPathPattern=integration\\.test\\.ts$",
     "test:all": "NODE_ENV=test jest",
+    "test:coverage": "NODE_ENV=test jest --coverage",
     "docker:mqtt:up": "cd ../mqtt-broker && docker-compose up -d",
     "docker:mqtt:down": "cd ../mqtt-broker && docker-compose down",
-    "pretest:integration:setup": "yarn docker:mqtt:up && sleep 5",
-    "test:integration:setup": "NODE_ENV=test node -r ts-node/register ./src/index.ts & sleep 5 && yarn test:integration && pkill -f 'node'",
-    "posttest:integration:setup": "yarn docker:mqtt:down"
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "docker:build": "docker-compose build",
+    "docker:restart": "docker-compose restart",
+    "docker:test:up": "docker-compose -f docker-compose.test.yml up -d",
+    "docker:test:down": "docker-compose -f docker-compose.test.yml down",
+    "docker:test": "./scripts/test-docker-setup.sh",
+    "mqtt:test": "node ./scripts/test-mqtt-connection.js",
+    "pretest:integration": "yarn docker:test:up && sleep 5",
+    "test:integration": "NODE_ENV=test node -r ts-node/register ./src/index.ts & sleep 5 && yarn test:int && pkill -f 'node'",
+    "posttest:integration": "yarn docker:test:down",
+    "prepare": "npm run build"
   },
   "dependencies": {
     "async-mqtt": "^2.6.2",
@@ -56,9 +73,13 @@
     "typescript": "^5.8.2",
     "viem": "^2.23.12"
   },
+  "engines": {
+    "node": ">=16.0.0"
+  },
   "nodemonConfig": {
-    "execMap": {
-      "ts": "node --require ts-node/register/transpile-only"
-    }
+    "watch": ["src"],
+    "ext": "ts,json",
+    "ignore": ["src/**/*.spec.ts", "src/**/*.test.ts"],
+    "exec": "ts-node src/index.ts"
   }
 }

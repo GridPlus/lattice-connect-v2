@@ -197,3 +197,67 @@ If you're adament about having factory settings, you may reset your router in th
 
 ### How do I connect more than one Lattice1?
 Currently, the direct method supports a single Lattice1 at a time.
+
+## Docker Setup
+
+Lattice Connect Server can be run with Docker Compose, which sets up both the MQTT broker and the Node.js application server.
+
+### Prerequisites
+
+- Docker and Docker Compose installed
+- Node.js and Yarn installed (for local development)
+
+### Running the Services
+
+To start both the MQTT broker and application server:
+
+```bash
+# Build and start the containers
+yarn docker:build
+yarn docker:up
+
+# Check logs
+yarn docker:logs
+
+# Stop services
+yarn docker:down
+```
+
+### Testing the Setup
+
+We provide scripts to verify the Docker setup:
+
+```bash
+# Test if services are running properly
+yarn docker:test
+
+# Test MQTT connectivity specifically
+yarn mqtt:test
+```
+
+### Integration Tests
+
+Integration tests use a dedicated Docker Compose configuration:
+
+```bash
+# Run integration tests (will start test containers automatically)
+yarn test:integration
+```
+
+### Configuration
+
+The Docker environment uses environment variables from your `.env` file. Inside Docker containers, services communicate over the Docker network:
+
+- MQTT broker is accessible at hostname `mqtt` 
+- Default ports: MQTT (1883), App Server (8080)
+
+You can customize these settings in your `.env` file or by providing environment variables when starting the containers.
+
+### Development Workflow
+
+For development, you can:
+
+1. Run only the MQTT broker in Docker: `yarn docker:mqtt:up`
+2. Run the app locally: `yarn dev`
+
+This allows you to make changes to the code without rebuilding Docker containers.

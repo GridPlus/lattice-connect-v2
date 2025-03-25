@@ -33,10 +33,7 @@ const anvil = {
    * @param address - the target address to set the balance; default EXPECTED_WALLET_ACCOUNT_ETH_ADDRESS
    * @param balance (ETH) - the balance to set in ETH; default 100ETH
    */
-  async setBalance(
-    address: Address,
-    balance: string = EXPECTED_ADDRESS_DEFAULT_BALANCE_ETH,
-  ) {
+  async setBalance(address: Address, balance: string = EXPECTED_ADDRESS_DEFAULT_BALANCE_ETH) {
     await anvilPublicClient.request({
       body: {
         method: 'hardhat_setBalance',
@@ -72,6 +69,19 @@ const anvil = {
   },
 };
 
+// Define a custom mock client type that extends the Client type
+interface MockClient extends Partial<Client> {
+  _connectionStatus: boolean;
+  getConnectionStatus: jest.Mock;
+  setConnectionStatus: jest.Mock;
+  sign: jest.Mock;
+  connect: jest.Mock;
+  getAddresses: jest.Mock;
+  getStateData: jest.Mock;
+  pair: jest.Mock;
+  disconnect: jest.Mock;
+}
+
 describe('GridPlus Provider Integration Tests', () => {
   let mockClient: jest.Mocked<Client>;
   let mockAppService: IAppService;
@@ -103,13 +113,24 @@ describe('GridPlus Provider Integration Tests', () => {
     };
 
     // Mock Client with more complete implementation
-    const mockClientBase = {
+    const mockClientBase: MockClient = {
+      _connectionStatus: true,
+      getConnectionStatus: jest.fn().mockImplementation(function (this: MockClient) {
+        return this._connectionStatus;
+      }),
+      setConnectionStatus: jest.fn().mockImplementation(function (
+        this: MockClient,
+        status: boolean
+      ) {
+        this._connectionStatus = status;
+        return this._connectionStatus;
+      }),
       sign: jest.fn(),
       connect: jest.fn().mockResolvedValue(undefined),
       getAddresses: jest.fn(),
       getStateData: jest.fn().mockReturnValue({}),
       pair: jest.fn().mockResolvedValue(undefined),
-      isConnected: jest.fn().mockReturnValue(true),
+      disconnect: jest.fn(),
     };
 
     mockClient = mockClientBase as unknown as jest.Mocked<Client>;
@@ -165,7 +186,7 @@ describe('GridPlus Provider Integration Tests', () => {
       });
 
       // Mock client to simulate disconnection
-      mockClient.isConnected.mockReturnValue(false);
+      (mockClient as unknown as MockClient)._connectionStatus = false;
 
       // Simulate connection loss
       await provider.requestHandler(
@@ -196,7 +217,10 @@ describe('GridPlus Provider Integration Tests', () => {
     describe('Supported Methods', () => {
       describe('eth_requestAccounts', () => {
         it('should request accounts associated with the wallet', async () => {
-          const mockAddresses = [process.env.EXPECTED_WALLET_ACCOUNT_ETH_ADDRESS || '0x1234567890123456789012345678901234567890'];
+          const mockAddresses = [
+            process.env.EXPECTED_WALLET_ACCOUNT_ETH_ADDRESS ||
+              '0x1234567890123456789012345678901234567890',
+          ];
           mockClient.getAddresses.mockResolvedValue(mockAddresses);
 
           const mockJsonResponse = jest.fn();
@@ -240,7 +264,9 @@ describe('GridPlus Provider Integration Tests', () => {
           mockClient.sign.mockResolvedValue(mockSignature);
 
           const transaction = {
-            from: process.env.EXPECTED_WALLET_ACCOUNT_ETH_ADDRESS as Address || '0x1234567890123456789012345678901234567890',
+            from:
+              (process.env.EXPECTED_WALLET_ACCOUNT_ETH_ADDRESS as Address) ||
+              '0x1234567890123456789012345678901234567890',
             to: RECEIVER_ADDRESS,
             value: numberToHex(parseEther('0.001')),
             nonce: numberToHex(0),
@@ -334,4 +360,4 @@ describe('GridPlus Provider Integration Tests', () => {
       });
     });
   });
-}); 
+});
