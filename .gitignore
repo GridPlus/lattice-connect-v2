@@ -1,5 +1,4 @@
 .DS_Store
-docker-compose.y*ml
 
 dist/
 node_modules/

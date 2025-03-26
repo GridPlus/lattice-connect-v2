@@ -1,3 +1,5 @@
+# Lattice Connect V2
+
 <img src="assets/banner.png" />
 
 # 👋 Introduction
@@ -29,6 +31,84 @@ This project replaces the original _[lattice-connect](https://github.com/GridPlu
 
 At the time of release, the previous software should continue working as-is; however, GridPlus will no longer offer technical support, or otherwise provide maintenance for the prior version. Thus, breaking changes that may occur as we continue improving our customers' user experience should be expected, and switching to `v2` as soon as possible is highly recommended.
 
+# 📂 Project Structure
+
+The project follows a standard Express.js architecture with clear separation of concerns:
+
+```
+src/
+├── controllers/        # Business logic for handling requests
+│   ├── gridplus.controller.ts    # GridPlus provider controller
+│   ├── provision.controller.ts   # User provisioning controller
+│   └── signing.controller.ts     # Signing requests controller
+├── middleware/         # Express middleware
+│   ├── validate.ts     # Request validation middleware
+│   └── websocket.ts    # WebSocket handling middleware
+├── routes/             # API route definitions
+│   ├── gridplus.routes.ts   # GridPlus related routes
+│   ├── index.ts             # Main router that combines all routes
+│   ├── provision.routes.ts  # User provisioning routes
+│   └── signing.routes.ts    # Signing request routes
+├── services/           # Business logic services
+│   └── handlers/       # Handlers for different protocol operations
+├── clients/            # API clients for external services
+├── types/              # TypeScript type definitions
+└── utils/              # Utility functions
+```
+
+## API Routes
+
+- **GET /status**: Health check endpoint
+- **/signing/:deviceId**: Handle signing requests
+- **/provision**: User provisioning
+- **/gridplus/connect**: Connect to a GridPlus device
+- **/gridplus/:deviceId/method**: Execute blockchain methods
+
+# 🧪 Testing
+
+## Unit Tests (Jest)
+
+Unit tests validate individual components in isolation:
+
+```bash
+# Run unit tests
+yarn test
+
+# Run integration tests
+yarn test:int
+
+# Run all unit and integration tests
+yarn test:all
+```
+
+## End-to-End Testing (Vitest)
+
+The project includes comprehensive end-to-end (e2e) tests to verify overall system functionality. These tests use Vitest for improved performance and developer experience.
+
+```bash
+# Run all e2e tests
+yarn test:e2e
+
+# Run specific test suites
+yarn test:e2e:api
+yarn test:e2e:errors
+yarn test:e2e:websocket
+
+# Run tests with UI
+yarn test:e2e:ui
+
+# Run tests in watch mode
+yarn test:e2e:watch
+```
+
+### E2E Test Structure
+
+- **API Tests**: Basic functionality tests for main API endpoints
+- **Error Handling**: Tests for error conditions and edge cases
+- **WebSocket Tests**: Tests for WebSocket connections and events
+
+For more details about the migration from Jest to Vitest, see [E2E Vitest Migration Guide](e2e/VITEST-MIGRATION.md).
+
 # ⌛️ Setup Guide
 
 ##### Estimated Time (TOTAL): 5–10 minutes
@@ -37,9 +117,6 @@ It's possible to run the server:
 
  - directly on a host system using `node` v14+; or,
  - through a `Docker` container.
-
-> _**NOTE:** The instructions for each are nearly identical. This guide describes `node`;
-scripts are provided in `connect/container` that support the `Docker` method._
 
 ### System Requirements
 
@@ -60,15 +137,15 @@ Clone the repo to the server or computer you plan to run it on:
  # Clone the repo:
 $ git clone https://github.com/GridPlus/lattice-connect-v2.git
 
-# Change your working director to the 'connect' folder:
-$ cd lattice-connect-v2/connect
+# Change your working directory to the project folder:
+$ cd lattice-connect-v2
 ```
 
 #### 2️⃣ Configure the environment
-Edit `connect/.direct.env` and set your device's hostname: 
+Edit `.env` and set your device's hostname: 
 
 ```sh
-# - Open the '.direct.env' file; then,
+# - Open the '.env' file; then,
 # - Replace this with your device's hostname 
 ADMIN_CLIENT_HOST=http://GridPlus-xxxxxxxxxxx.local 
 ```
@@ -80,31 +157,34 @@ On Firmware v16, and above, the device's hostname is shown with the following st
  3. Tap **Device Info**; then,
  4. See `SSH Host`.
 
-## 🌐 Start Proxy: Using Node
-From inside `connect` folder, run: 
+## 🌐 Start Server: Using Node
+From the project root folder, run: 
 
 ```sh
 # Install dependencies
-$ npm i 
+$ yarn install
 
-# Start the proxy
-$ npm run start:direct
+# Start the server in development mode
+$ yarn dev
+
+# For production, build and start
+$ yarn build
+$ yarn start
 
 # Look for confirmation...
-... [!] MQTT client connected
+... Worker 1 listening on port 8080
 ```
 
-<img src="assets/start-direct.gif" />
+## 🐳 Start Server: Using Docker
+From inside the project root folder, run:
 
-## 🐳 Start Proxy: Using Docker
-From inside the `connect/container` folder, run:
+```bash
+# Build and start the containers
+$ yarn docker:build
+$ yarn docker:up
 
-```sh
-# Script to build the container
-$ ./dockerBuild.sh
-
-# Script to start the proxy server
-$ ./dockerStart.sh
+# Check logs
+$ yarn docker:logs
 ```
 
 ## 🔬 Troubleshooting 
@@ -121,7 +201,7 @@ If the server fails to connect:
 For many of the most common network setups, the server should have no trouble finding, and connecting, to the Lattice<sup>1</sup>. However, if it's unable to connect—and you're certain you've inputted the `<HOSTNAME>.local` correct—use the device's IP address instead:
 
 ```sh
-# - Open the '.direct.env' file; then,
+# - Open the '.env' file; then,
 # - Replace this with your device's IP address.
 # - DON'T include '.local'; it's standard IPv4 format.
 ADMIN_CLIENT_HOST=http://<IP_ADDRESS>
@@ -261,3 +341,19 @@ For development, you can:
 2. Run the app locally: `yarn dev`
 
 This allows you to make changes to the code without rebuilding Docker containers.
+
+## Contributing
+
+Contributions are welcome! Please follow the standard GitHub workflow:
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
+
+### Development Guidelines
+
+- Follow the Express.js architecture pattern
+- Add appropriate TypeScript types
+- Write tests for new functionality
+- Format code with Prettier before submitting

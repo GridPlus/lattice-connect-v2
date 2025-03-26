@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  mqtt:
+    image: eclipse-mosquitto:2.0.15
+    container_name: lattice_mqtt
+    ports:
+      - "${MQTT_HTTP_PORT:-1883}:1883"  # MQTT
+      - "9001:9001"  # WebSocket
+    volumes:
+      - ./mqtt-config:/mosquitto/config
+      - ./mqtt-data:/mosquitto/data
+      - ./mqtt-log:/mosquitto/log
+    networks:
+      - lattice-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mosquitto_sub", "-t", "$$", "-C", "1", "-i", "healthcheck", "-W", "3"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  app:
+    build:
+      context: .
+      dockerfile: container/Dockerfile
+    container_name: lattice_app
+    depends_on:
+      mqtt:
+        condition: service_healthy
+    environment:
+      - NODE_ENV=production
+      - MQTT_HOST=mqtt
+      - MQTT_HTTP_PORT=${MQTT_HTTP_PORT:-1883}
+      - MQTT_USER=${MQTT_USER:-lattice_user}
+      - MQTT_PASS=${MQTT_PASS:-lattice_pass}
+      - ADMIN_CLIENT_HOST=http://mqtt:15672
+      - ADMIN_CLIENT_USER=${ADMIN_CLIENT_USER:-guest}
+      - ADMIN_CLIENT_PASS=${ADMIN_CLIENT_PASS:-guest}
+      - APP_SERVICE_PORT=${APP_SERVICE_PORT:-8080}
+      - APP_WORKER_COUNT=${APP_WORKER_COUNT:-2}
+      - LATTICE_CONNECT_URL=${LATTICE_CONNECT_URL:-https://signing.gridpl.us}
+    ports:
+      - "${APP_SERVICE_PORT:-8080}:8080"
+    networks:
+      - lattice-network
+    restart: unless-stopped
+
+networks:
+  lattice-network:
+    driver: bridge 

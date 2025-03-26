@@ -1,12 +1,11 @@
 import { describe, it, expect } from '@jest/globals';
-import { IAppService } from '../../core';
-import { useGridPlusProvider } from '../GridPlusProvider';
+import * as gridplusController from '../../controllers/gridplus.controller';
 import { EventEmitter } from 'events';
 import { DEFAULT_CHAIN } from '../handlers/types';
 
-describe('GridPlusProvider Unit Tests', () => {
+describe('GridPlus Provider Unit Tests', () => {
   let logger: any;
-  let provider: ReturnType<typeof useGridPlusProvider>;
+  let deviceEmitter: EventEmitter;
 
   beforeEach(() => {
     logger = {
@@ -14,32 +13,30 @@ describe('GridPlusProvider Unit Tests', () => {
       error: jest.fn(),
     };
 
-    const service: IAppService = {
-      app: {
-        post: jest.fn(),
-      } as any,
-      logger,
-    };
-
-    provider = useGridPlusProvider(service);
+    // Get a device emitter
+    deviceEmitter = gridplusController.getDeviceEmitter('test-device-id');
   });
 
   describe('Provider Initialization', () => {
-    it('should return a provider with required methods', () => {
-      expect(provider).toBeDefined();
-      expect(provider.requestHandler).toBeDefined();
-      expect(provider.connectHandler).toBeDefined();
-      expect(provider.emitter).toBeInstanceOf(EventEmitter);
+    it('should provide core functionality', () => {
+      expect(gridplusController.generateToken).toBeDefined();
+      expect(gridplusController.getStateFromToken).toBeDefined();
+      expect(gridplusController.updateStateForToken).toBeDefined();
+      expect(gridplusController.getDeviceEmitter).toBeDefined();
+      expect(gridplusController.authenticateRequest).toBeDefined();
+      expect(gridplusController.initializeMethodClient).toBeDefined();
+      expect(gridplusController.connectDevice).toBeDefined();
+      expect(gridplusController.handleMethodRequest).toBeDefined();
     });
   });
 
-  describe('Event Emitter', () => {
+  describe('Device Emitter', () => {
     it('should allow event subscription and emission', () => {
       const mockHandler = jest.fn();
       const mockData = { chainId: DEFAULT_CHAIN.chainId };
 
-      provider.emitter.on('connect', mockHandler);
-      provider.emitter.emit('connect', mockData);
+      deviceEmitter.on('connect', mockHandler);
+      deviceEmitter.emit('connect', mockData);
 
       expect(mockHandler).toHaveBeenCalledWith(mockData);
     });
@@ -48,24 +45,22 @@ describe('GridPlusProvider Unit Tests', () => {
       const mockHandler = jest.fn();
       const mockData = { chainId: DEFAULT_CHAIN.chainId };
 
-      provider.emitter.on('connect', mockHandler);
-      provider.emitter.removeListener('connect', mockHandler);
-      provider.emitter.emit('connect', mockData);
+      deviceEmitter.on('connect', mockHandler);
+      deviceEmitter.removeListener('connect', mockHandler);
+      deviceEmitter.emit('connect', mockData);
 
       expect(mockHandler).not.toHaveBeenCalled();
     });
   });
 
-  describe('Logger Integration', () => {
-    it('should use the provided logger', () => {
-      const testMessage = 'Test log message';
-      const testError = new Error('Test error');
+  describe('Token Generation', () => {
+    it('should generate unique tokens for different device IDs', () => {
+      const token1 = gridplusController.generateToken('device-1');
+      const token2 = gridplusController.generateToken('device-2');
 
-      logger.info(testMessage);
-      logger.error(testError);
-
-      expect(logger.info).toHaveBeenCalledWith(testMessage);
-      expect(logger.error).toHaveBeenCalledWith(testError);
+      expect(token1).not.toEqual(token2);
+      expect(token1.length).toBeGreaterThan(32); // Should be a sufficiently long string
+      expect(token2.length).toBeGreaterThan(32);
     });
   });
-}); 
+});

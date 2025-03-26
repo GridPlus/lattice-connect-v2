@@ -11,8 +11,10 @@
     "forceConsistentCasingInFileNames": true,
     "moduleResolution": "node",
     "resolveJsonModule": true,
+    "typeRoots": ["./node_modules/@types", "./src/types"],
     "types": ["node", "jest"]
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "src/types"],
+  "files": ["src/types/express.d.ts"],
   "exclude": ["node_modules", "dist"]
 }

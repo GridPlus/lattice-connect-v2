@@ -8,25 +8,24 @@
     "start": "NODE_ENV=production node dist/index.js",
     "dev": "NODE_ENV=development nodemon --exec ts-node src/index.ts",
     "dev:mqtt": "DEBUG='mqttjs*' NODE_ENV=development nodemon --exec ts-node src/index.ts",
-    "dev:direct": "nodemon --exec ts-node src/direct.ts",
-    "dev:direct:mqtt": "DEBUG='mqttjs*' NODE_ENV=development nodemon --exec ts-node src/direct.ts",
     "build": "tsc",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "format": "prettier --write \"src/**/*.ts\"",
-    "test": "NODE_ENV=test jest --testPathPattern=test\\.ts$ --testPathIgnorePatterns=integration\\.test\\.ts$",
-    "test:int": "NODE_ENV=test jest --testPathPattern=integration\\.test\\.ts$",
-    "test:all": "NODE_ENV=test jest",
-    "test:coverage": "NODE_ENV=test jest --coverage",
+    "test": "NODE_ENV=test jest --config jest.unit.config.js --testPathPattern=test\\.ts$ --testPathIgnorePatterns=integration\\.test\\.ts$",
+    "test:int": "NODE_ENV=test jest --config jest.unit.config.js --testPathPattern=controllers/.*\\.integration\\.test\\.ts$",
+    "test:all": "NODE_ENV=test jest --config jest.unit.config.js",
+    "test:e2e": "NODE_ENV=test vitest run --config vitest.e2e.config.ts",
+    "test:e2e:api": "NODE_ENV=test vitest run --config vitest.e2e.config.ts 'e2e/api.e2e.test.ts'",
+    "test:e2e:errors": "NODE_ENV=test vitest run --config vitest.e2e.config.ts 'e2e/errors.e2e.test.ts'",
+    "test:e2e:websocket": "NODE_ENV=test vitest run --config vitest.e2e.config.ts 'e2e/websocket.e2e.test.ts'",
+    "test:e2e:sequential": "yarn test:e2e:api && yarn test:e2e:errors && yarn test:e2e:websocket",
+    "test:e2e:watch": "NODE_ENV=test vitest watch --config vitest.e2e.config.ts",
+    "test:e2e:ui": "NODE_ENV=test vitest --ui --config vitest.e2e.config.ts",
     "docker:mqtt:up": "cd ../mqtt-broker && docker-compose up -d",
     "docker:mqtt:down": "cd ../mqtt-broker && docker-compose down",
-    "docker:up": "docker-compose up -d",
-    "docker:down": "docker-compose down",
-    "docker:logs": "docker-compose logs -f",
-    "docker:build": "docker-compose build",
-    "docker:restart": "docker-compose restart",
-    "docker:test:up": "docker-compose -f docker-compose.test.yml up -d",
-    "docker:test:down": "docker-compose -f docker-compose.test.yml down",
+    "docker:test:up": "cd ../mqtt-broker && docker-compose up -d && cd ../rabbitmq-broker && docker-compose up -d",
+    "docker:test:down": "cd ../mqtt-broker && docker-compose down && cd ../rabbitmq-broker && docker-compose down",
     "docker:test": "./scripts/test-docker-setup.sh",
     "mqtt:test": "node ./scripts/test-mqtt-connection.js",
     "pretest:integration": "yarn docker:test:up && sleep 5",
@@ -60,6 +59,8 @@
     "@types/ws": "^8.18.0",
     "@typescript-eslint/eslint-plugin": "^8.26.1",
     "@typescript-eslint/parser": "^8.26.1",
+    "@vitest/ui": "^3.0.9",
+    "axios": "^1.6.8",
     "concurrently": "^9.1.2",
     "eslint": "^9.22.0",
     "eslint-config-prettier": "^10.1.1",
@@ -71,15 +72,22 @@
     "ts-jest": "^29.2.6",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.2",
-    "viem": "^2.23.12"
+    "viem": "^2.23.12",
+    "vitest": "^3.0.9",
+    "ws": "^8.16.0"
   },
   "engines": {
     "node": ">=16.0.0"
   },
   "nodemonConfig": {
-    "watch": ["src"],
+    "watch": [
+      "src"
+    ],
     "ext": "ts,json",
-    "ignore": ["src/**/*.spec.ts", "src/**/*.test.ts"],
+    "ignore": [
+      "src/**/*.spec.ts",
+      "src/**/*.test.ts"
+    ],
     "exec": "ts-node src/index.ts"
   }
 }
