@@ -42,7 +42,8 @@
     "express-pino-logger": "^7.0.0",
     "gridplus-sdk": "^3.4.0",
     "pino-http": "^8.1.1",
-    "superagent": "^8.0.0"
+    "superagent": "^8.0.0",
+    "viem": "^2.23.12"
   },
   "devDependencies": {
     "@turnkey/api-key-stamper": "^0.4.4",
@@ -72,7 +73,6 @@
     "ts-jest": "^29.2.6",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.2",
-    "viem": "^2.23.12",
     "vitest": "^3.0.9",
     "ws": "^8.16.0"
   },
