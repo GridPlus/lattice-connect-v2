@@ -22,6 +22,7 @@ import {
   DEFAULT_CAPABILITIES,
   DEFAULT_CHAIN,
   MethodParams,
+  PairRequest,
   RPCRequest,
   SendCallsRequest,
   StateData,
@@ -217,6 +218,88 @@ export const connectDevice = async (req: Request, res: Response) => {
     console.error('Error during connection:', error);
     res.status(500).json({
       message: 'Failed to connect to device',
+      error: error?.message || String(error),
+    });
+  }
+};
+
+/**
+ * Pair with a device
+ */
+export const pairDevice = async (req: Request, res: Response) => {
+  try {
+    const { deviceId, pairingCode } = req.body as PairRequest;
+
+    if (!deviceId || !pairingCode) {
+      res.status(400).json({ message: 'Missing deviceId or pairingCode' });
+      return;
+    }
+
+    // Get token from deviceId
+    const token = deviceToTokenMap.get(deviceId);
+    if (!token) {
+      res.status(404).json({ message: 'Device not found. Connect to the device first.' });
+      return;
+    }
+
+    // Get state data from token
+    const state = getStateFromToken(token);
+    if (!state) {
+      res.status(404).json({ message: 'Device state not found. Connect to the device first.' });
+      return;
+    }
+
+    // Create a new client instance with state data
+    const client = new Client({
+      name: 'SDK Test2',
+      privKey: Buffer.alloc(32), // Temporary key, will be overwritten by state data
+      baseUrl: process.env.GRIDPLUS_CONNECT_URL,
+      timeout: 120000, // 2 minutes
+      stateData: state.clientData,
+      setStoredClient: async (data: string | null) => {
+        if (data) {
+          state.clientData = data;
+        }
+        return Promise.resolve();
+      },
+    });
+
+    console.info(`Attempting to pair with device ${deviceId} using code ${pairingCode}`);
+
+    // Pair with the device
+    await client.pair(pairingCode);
+    console.info(`Successfully paired with device ${deviceId}`);
+
+    // Update client state in our map
+    state.clientData = client.getStateData();
+    updateStateForToken(token, state);
+
+    // Get addresses (to refresh the state)
+    const addresses = await client.getAddresses({
+      startPath: [HARDENED_OFFSET + 44, HARDENED_OFFSET + 60, HARDENED_OFFSET, 0, 0],
+      n: 1,
+    });
+
+    // Convert addresses to string array
+    const addressStrings = ((addresses || []) as string[]).map((addr) => addr.toString());
+    state.connectedAccounts = addressStrings;
+
+    // Update state and emit event if accounts changed
+    updateStateForToken(token, state);
+    const emitter = getDeviceEmitter(deviceId);
+    if (JSON.stringify(addressStrings) !== JSON.stringify(state.connectedAccounts)) {
+      emitter.emit('accountsChanged', addressStrings);
+    }
+
+    res.json({
+      token,
+      message: 'Device paired successfully',
+      addresses: addressStrings,
+    });
+  } catch (error: any) {
+    console.error('Error during pairing:', error);
+    res.status(500).json({
+      message: 'Failed to pair with device',
       error: error?.message || String(error),
     });
   }

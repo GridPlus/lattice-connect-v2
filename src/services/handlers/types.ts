@@ -219,6 +219,11 @@ export interface ConnectRequest {
   appSecret?: string;
 }
 
+export interface PairRequest {
+  deviceId: string;
+  pairingCode: string;
+}
+
 export interface ProviderRpcError extends Error {
   code: number;
   data?: unknown;
