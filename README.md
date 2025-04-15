@@ -357,3 +357,12 @@ Contributions are welcome! Please follow the standard GitHub workflow:
 - Add appropriate TypeScript types
 - Write tests for new functionality
 - Format code with Prettier before submitting
+
+## Client Examples
+
+For client applications connecting to `lattice-connect-v2`, you can find working TypeScript examples in the [`lattice-client-examples`](./lattice-client-examples) directory:
+
+- **SDK-based Client**: Uses the `gridplus-sdk` library to connect to a Lattice1 device through lattice-connect-v2
+- **Direct API Client**: Communicates directly with the lattice-connect-v2 REST API
+
+Each example demonstrates how to connect to a device, pair with it (if needed), fetch addresses, and sign Ethereum transactions. See the [examples README](./lattice-client-examples/README.md) for more details.

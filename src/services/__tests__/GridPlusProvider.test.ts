@@ -1,4 +1,4 @@
-import { describe, it, expect } from '@jest/globals';
+import { vi } from 'vitest';
 import * as gridplusController from '../../controllers/gridplus.controller';
 import { EventEmitter } from 'events';
 import { DEFAULT_CHAIN } from '../handlers/types';
@@ -9,8 +9,8 @@ describe('GridPlus Provider Unit Tests', () => {
 
   beforeEach(() => {
     logger = {
-      info: jest.fn(),
-      error: jest.fn(),
+      info: vi.fn(),
+      error: vi.fn(),
     };
 
     // Get a device emitter
@@ -32,7 +32,7 @@ describe('GridPlus Provider Unit Tests', () => {
 
   describe('Device Emitter', () => {
     it('should allow event subscription and emission', () => {
-      const mockHandler = jest.fn();
+      const mockHandler = vi.fn();
       const mockData = { chainId: DEFAULT_CHAIN.chainId };
 
       deviceEmitter.on('connect', mockHandler);
@@ -42,7 +42,7 @@ describe('GridPlus Provider Unit Tests', () => {
     });
 
     it('should allow event unsubscription', () => {
-      const mockHandler = jest.fn();
+      const mockHandler = vi.fn();
       const mockData = { chainId: DEFAULT_CHAIN.chainId };
 
       deviceEmitter.on('connect', mockHandler);

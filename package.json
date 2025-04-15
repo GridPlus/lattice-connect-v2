@@ -8,6 +8,7 @@
     "start": "NODE_ENV=production node dist/index.js",
     "dev": "NODE_ENV=development nodemon --exec ts-node src/index.ts",
     "dev:mqtt": "DEBUG='mqttjs*' NODE_ENV=development nodemon --exec ts-node src/index.ts",
+    "debug": "DEBUG='gridplus-sdk:*,mqttjs*,lattice-connect:*' NODE_ENV=development nodemon --exec ts-node src/index.ts",
     "build": "tsc",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
@@ -34,6 +35,7 @@
     "prepare": "npm run build"
   },
   "dependencies": {
+    "@ethersproject/units": "^5.8.0",
     "async-mqtt": "^2.6.2",
     "bs58": "^5.0.0",
     "cors": "^2.8.5",
@@ -41,11 +43,16 @@
     "express": "^4.21.2",
     "express-pino-logger": "^7.0.0",
     "gridplus-sdk": "^3.4.0",
+    "ox": "^0.7.0",
     "pino-http": "^8.1.1",
     "superagent": "^8.0.0",
     "viem": "^2.23.12"
   },
   "devDependencies": {
+    "@playwright/test": "^1.51.1",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
     "@turnkey/api-key-stamper": "^0.4.4",
     "@turnkey/http": "^2.21.0",
     "@types/body-parser": "^1.19.5",
@@ -66,14 +73,16 @@
     "eslint": "^9.22.0",
     "eslint-config-prettier": "^10.1.1",
     "eslint-plugin-prettier": "^5.2.3",
+    "happy-dom": "^17.4.4",
     "jest": "^29.7.0",
+    "jsdom": "^26.1.0",
     "nodemon": "^2.0.19",
     "prettier": "^3.5.3",
     "supertest": "^7.0.0",
     "ts-jest": "^29.2.6",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.2",
-    "vitest": "^3.0.9",
+    "vitest": "^3.1.1",
     "ws": "^8.16.0"
   },
   "engines": {

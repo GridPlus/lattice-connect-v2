@@ -7,6 +7,7 @@ declare global {
       gridplusClient?: Client;
       deviceStateData?: StateData;
       deviceId?: string;
+      currentToken?: string;
     }
   }
 }

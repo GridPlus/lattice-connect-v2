@@ -1,0 +1,181 @@
+:root {
+  --primary-color: #2d74da;
+  --primary-hover: #1c5fc4;
+  --background-color: #f5f5f7;
+  --card-background: #ffffff;
+  --text-color: #333333;
+  --border-color: #e0e0e0;
+  --success-color: #34a853;
+  --error-color: #ea4335;
+  --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+body {
+  background-color: var(--background-color);
+  color: var(--text-color);
+  font-family: var(--font-family);
+  line-height: 1.6;
+  margin: 0;
+  padding: 0;
+}
+
+.App {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+h1 {
+  color: var(--primary-color);
+  text-align: center;
+  margin-bottom: 2rem;
+  font-size: 2.2rem;
+}
+
+h2 {
+  border-bottom: 2px solid var(--primary-color);
+  padding-bottom: 0.5rem;
+  margin-top: 0;
+  font-size: 1.5rem;
+}
+
+.token-display {
+  background-color: var(--card-background);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 1rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.token-display h3 {
+  margin-top: 0;
+  color: var(--primary-color);
+}
+
+.token {
+  background-color: #f0f0f0;
+  padding: 0.75rem;
+  border-radius: 4px;
+  font-family: monospace;
+  word-break: break-all;
+  margin: 0;
+}
+
+.form-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+  gap: 2rem;
+}
+
+.form-section {
+  background-color: var(--card-background);
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+input, select, textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-size: 1rem;
+  font-family: var(--font-family);
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(45, 116, 218, 0.2);
+}
+
+textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+button {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+button:hover {
+  background-color: var(--primary-hover);
+}
+
+button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.help-text {
+  color: #666;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+.response {
+  margin-top: 1.5rem;
+  border-top: 1px solid var(--border-color);
+  padding-top: 1rem;
+}
+
+.response h4 {
+  margin-top: 0;
+  color: var(--primary-color);
+}
+
+pre {
+  background-color: #f0f0f0;
+  padding: 1rem;
+  border-radius: 4px;
+  overflow-x: auto;
+  font-family: monospace;
+  white-space: pre-wrap;
+  margin: 0;
+}
+
+.error-container {
+  background-color: #fff8f8;
+  border: 1px solid var(--error-color);
+  border-radius: 6px;
+  padding: 1rem;
+  margin-top: 2rem;
+}
+
+.error-container h3 {
+  color: var(--error-color);
+  margin-top: 0;
+}
+
+.error-container pre {
+  background-color: #fff0f0;
+  color: var(--error-color);
+}
+
+@media (max-width: 768px) {
+  .form-container {
+    grid-template-columns: 1fr;
+  }
+  
+  .App {
+    padding: 1rem;
+  }
+} 
