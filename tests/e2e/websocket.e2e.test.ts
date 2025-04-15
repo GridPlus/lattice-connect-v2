@@ -37,7 +37,7 @@ describe('WebSocket API', () => {
       // Set up WebSocket connection
       const port = getTestPort();
       const baseUrl = `ws://localhost:${port}`;
-      const wsUrl = `${baseUrl}/gridplus/${mockDevice.deviceId}`;
+      const wsUrl = `${baseUrl}/api/v1/device/${mockDevice.deviceId}`;
 
       // Connect with a timeout and error handling
       try {

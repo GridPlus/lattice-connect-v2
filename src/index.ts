@@ -8,6 +8,7 @@ import cluster from 'cluster';
 import os from 'os';
 import http from 'http';
 import { initializeWebSocketServer } from './middleware/websocket';
+import { useSigning } from './legacy/useSigning';
 
 // Load environment variables
 dotenv.config();
@@ -55,11 +56,24 @@ if (cluster.isPrimary) {
     });
   });
 
-  // Register all routes
-  app.use(routes);
-
-  // Create HTTP server
+  // Create HTTP server (must be before routes are registered)
   const server = http.createServer(app);
+
+  // Setup the app with server for legacy compatibility
+  const appService = {
+    app,
+    logger: console,
+    server,
+  };
+
+  // Initialize Legacy Signing for backward compatibility
+  // This should be done before registering other routes to ensure proper request handling
+  useSigning(appService).catch((err) => {
+    console.error('Failed to initialize legacy signing service:', err);
+  });
+
+  // Register all v2 routes
+  app.use(routes);
 
   // Initialize WebSocket server if needed
   if (process.env.ADMIN_CLIENT_HOST) {

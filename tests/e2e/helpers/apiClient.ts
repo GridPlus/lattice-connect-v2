@@ -76,7 +76,7 @@ export class ApiClient {
     deviceId: string,
     options: { name?: string; password?: string; appSecret?: string } = {}
   ): Promise<AxiosResponse<any>> {
-    const response = await this.post('/gridplus/connect', {
+    const response = await this.post('/api/v1/device/connect', {
       deviceId,
       name: options.name || 'E2E Test',
       password: options.password,
@@ -98,7 +98,7 @@ export class ApiClient {
     method: string,
     params: any[] = []
   ): Promise<AxiosResponse<any>> {
-    return this.post(`/gridplus/${deviceId}/method`, {
+    return this.post(`/api/v1/device/${deviceId}/method`, {
       method,
       params,
     });
@@ -133,6 +133,6 @@ export class ApiClient {
    * Provision a new user (if ADMIN_CLIENT_HOST is set)
    */
   async provisionUser(): Promise<AxiosResponse<any>> {
-    return this.get('/provision');
+    return this.get('/api/v1/provision');
   }
 }

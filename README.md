@@ -31,7 +31,17 @@ This project replaces the original _[lattice-connect](https://github.com/GridPlu
 
 At the time of release, the previous software should continue working as-is; however, GridPlus will no longer offer technical support, or otherwise provide maintenance for the prior version. Thus, breaking changes that may occur as we continue improving our customers' user experience should be expected, and switching to `v2` as soon as possible is highly recommended.
 
-# 📂 Project Structure
+### Backward Compatibility
+
+While we recommend using the new API endpoints, we understand that migration takes time. To ease this transition, Lattice Connect V2 maintains backward compatibility with the v1 API structure:
+
+- The original `POST /:deviceId` endpoint is still available
+- Legacy format requests (binary payload) are automatically translated to the v2 format
+- No code changes needed in existing applications while you prepare to migrate
+
+This allows you to deploy Lattice Connect V2 as a drop-in replacement for v1 while you work on updating your client applications to use the new, more structured API endpoints.
+
+# �� Project Structure
 
 The project follows a standard Express.js architecture with clear separation of concerns:
 
@@ -59,10 +69,18 @@ src/
 ## API Routes
 
 - **GET /status**: Health check endpoint
-- **/signing/:deviceId**: Handle signing requests
-- **/provision**: User provisioning
-- **/gridplus/connect**: Connect to a GridPlus device
-- **/gridplus/:deviceId/method**: Execute blockchain methods
+- **/api/v1/signing/:deviceId**: Handle signing requests
+- **/api/v1/provision**: User provisioning
+- **/api/v1/device/connect**: Connect to a GridPlus device
+- **/api/v1/device/:deviceId/method**: Execute blockchain methods
+
+### Legacy API Support
+
+For backward compatibility with applications using the original lattice-connect v1, we've maintained support for the legacy API endpoint:
+
+- **POST /:deviceId**: The original v1 endpoint that accepts a binary payload
+  
+This allows existing applications to continue working without modification while you transition to the newer, more structured v2 API. The legacy endpoint will translate your requests to the new API format internally.
 
 # 🧪 Testing
 

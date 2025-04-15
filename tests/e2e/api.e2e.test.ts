@@ -1,6 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import { ApiClient } from './helpers/apiClient';
 import { createMockDevice } from './helpers/mockDevice';
+import axios from 'axios';
+import { getTestPort } from './helpers/testUtils';
+import { Client } from './helpers/client';
+import { vi } from 'vitest';
 
 // Initialize API client for all tests
 const api = new ApiClient();
@@ -109,5 +113,44 @@ describe('Provision API', () => {
     expect(response.status).toBeDefined();
 
     console.log('Provision response:', response.status);
+  });
+});
+
+describe('Legacy API Endpoint Tests', () => {
+  const mockDeviceId = 'LEGACY1';
+  const mockBinaryData = Buffer.from([1, 2, 3, 4, 5]);
+
+  it('should handle legacy POST /:deviceId requests', async () => {
+    // Mock the client.sendRequest method to return predictable result
+    const mockResult = Buffer.from('hello from device', 'utf8');
+    vi.spyOn(Client.prototype, 'connect').mockResolvedValue(true);
+    vi.spyOn(Client.prototype, 'sendRequest').mockResolvedValue(mockResult);
+
+    // Make request to the legacy endpoint
+    const response = await axios.post(
+      `http://localhost:${getTestPort()}/${mockDeviceId}`,
+      { data: mockBinaryData },
+      { validateStatus: () => true }
+    );
+
+    // Verify response format matches legacy API
+    expect(response.status).toBe(200);
+    expect(response.data).toHaveProperty('status', 200);
+    expect(response.data).toHaveProperty('message', mockResult.toString('hex'));
+  });
+
+  it('should return 400 for legacy requests without data', async () => {
+    // Make request to the legacy endpoint without data
+    const response = await axios.post(
+      `http://localhost:${getTestPort()}/${mockDeviceId}`,
+      {}, // No data provided
+      { validateStatus: () => true }
+    );
+
+    // Verify error response
+    expect(response.status).toBe(400);
+    expect(response.data).toHaveProperty('status', 400);
+    expect(response.data).toHaveProperty('message');
+    expect(response.data.message).toContain('Missing');
   });
 });

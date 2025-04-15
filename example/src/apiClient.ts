@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost:8080/gridplus';
+const API_BASE = 'http://localhost:8080/api/v1/device';
 
 // Store the current token
 let currentToken: string | null = null;

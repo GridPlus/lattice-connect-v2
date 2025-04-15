@@ -1,8 +1,8 @@
 {
-  "name": "lattice-connect-server",
+  "name": "gridplus-connect",
   "private": true,
-  "version": "0.1.0",
-  "description": "Node.js server for GridPlus Lattice1 connectivity",
+  "version": "3.0.0",
+  "description": "Node.js server for GridPlus device connectivity",
   "main": "dist/index.js",
   "scripts": {
     "start": "NODE_ENV=production node dist/index.js",

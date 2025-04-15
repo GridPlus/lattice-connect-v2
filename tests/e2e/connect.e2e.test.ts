@@ -9,7 +9,7 @@ describe('Device Connection E2E Tests', () => {
     api = new ApiClient();
   });
 
-  describe('POST /gridplus/connect', () => {
+  describe('POST /api/v1/device/connect', () => {
     it('should connect to a device with valid credentials', async () => {
       const mockDevice = createMockDevice();
       const response = await api.connectToDevice(mockDevice.deviceId, {
@@ -54,7 +54,7 @@ describe('Device Connection E2E Tests', () => {
     });
 
     it('should require deviceId in request body', async () => {
-      const response = await api.post('/gridplus/connect', {
+      const response = await api.post('/api/v1/device/connect', {
         password: 'wNa17ofS261Bb3ba',
         name: 'Test Device',
       });
