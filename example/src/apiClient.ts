@@ -51,21 +51,22 @@ export async function pairDevice(payload: any) {
 }
 
 export async function callDeviceMethod(deviceId: string, payload: any) {
-  const res = await fetch(`${API_BASE}/${deviceId}/method`, {
-    method: 'POST',
-    headers: createHeaders(),
-    body: JSON.stringify(payload),
-  });
-  return processResponse(res);
-}
+  console.log(`Calling method for device ${deviceId}:`, payload);
+  console.log('Using headers:', createHeaders());
 
-export async function signRequest(deviceId: string, payload: any) {
-  const res = await fetch(`${API_BASE}/signing/${deviceId}`, {
-    method: 'POST',
-    headers: createHeaders(),
-    body: JSON.stringify(payload),
-  });
-  return processResponse(res);
+  try {
+    const res = await fetch(`${API_BASE}/${deviceId}/method`, {
+      method: 'POST',
+      headers: createHeaders(),
+      body: JSON.stringify(payload),
+    });
+
+    console.log('Response status:', res.status);
+    return processResponse(res);
+  } catch (error) {
+    console.error('API call error:', error);
+    throw error;
+  }
 }
 
 export async function provisionUser(payload: any) {

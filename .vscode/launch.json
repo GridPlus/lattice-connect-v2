@@ -1,23 +1,22 @@
 {
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
   "version": "0.2.0",
   "configurations": [
     {
       "type": "node",
       "request": "launch",
-      "name": "Debug EIP1193 Tests",
-      "runtimeExecutable": "yarn",
+      "name": "Debug Lattice Connect Server",
       "runtimeArgs": [
-        "test",
-        "src/services/useEIP1193Provider.integration.test.ts",
-        "--runInBand"
+        "-r",
+        "ts-node/register"
       ],
-      "console": "integratedTerminal",
-      "internalConsoleOptions": "neverOpen",
       "env": {
-        "NODE_ENV": "test"
+        "NODE_ENV": "development"
       },
-      "sourceMaps": true,
-      "cwd": "${workspaceFolder}/connect"
+      "program": "${workspaceFolder}/src/index.ts",
+      "cwd": "${workspaceFolder}",
+      "skipFiles": ["<node_internals>/**"]
     }
   ]
 } 

@@ -32,10 +32,6 @@ type MethodPayload = {
   params: any[];
 };
 
-type SignPayload = {
-  payload: string;
-};
-
 function App() {
   // State for forms
   const [connectForm, setConnectForm] = useState<ConnectPayload>({
@@ -59,7 +55,9 @@ function App() {
   
   const [signForm, setSignForm] = useState({
     deviceId: ENV.LATTICE_DEVICE_ID,
-    payload: '0x68656c6c6f20776f726c64', // "hello world" in hex
+    method: 'personal_sign',
+    message: 'Hello World',
+    account: '',
   });
   
   // Response handling
@@ -95,6 +93,30 @@ function App() {
     const intervalId = setInterval(checkToken, 1000);
     return () => clearInterval(intervalId);
   }, [token]);
+
+  // Set account when accounts are fetched
+  useEffect(() => {
+    if (methodResponse) {
+      try {
+        const response = JSON.parse(methodResponse);
+        console.log('Got method response for account detection:', response);
+        
+        // Handle different response formats
+        if (response.addresses && response.addresses.length > 0) {
+          // Format from our API: { addresses: [...] }
+          setSignForm(prev => ({ ...prev, account: response.addresses[0] }));
+          console.log('Found account in addresses:', response.addresses[0]);
+        } else if (response.result && Array.isArray(response.result) && response.result.length > 0) {
+          // Standard eth_accounts format: { result: [...] }
+          setSignForm(prev => ({ ...prev, account: response.result[0] }));
+          console.log('Found account in result:', response.result[0]);
+        }
+      } catch (e) {
+        console.warn('Error parsing method response:', e);
+        // Ignore parsing errors
+      }
+    }
+  }, [methodResponse]);
 
   // Handle connect form submission
   const handleConnect = async (e: React.FormEvent) => {
@@ -148,20 +170,79 @@ function App() {
     }
   };
 
-  // Handle sign form submission
+  // Convert string to hex
+  const stringToHex = (str: string): string => {
+    // Browser-compatible way to convert string to hex instead of using Node's Buffer
+    return '0x' + Array.from(str)
+      .map(c => c.charCodeAt(0).toString(16).padStart(2, '0'))
+      .join('');
+  };
+
+  // Handle sign form submission - now using eth methods
   const handleSign = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setSignResponse('');
     
     try {
-      const payload: SignPayload = {
-        payload: signForm.payload,
+      console.log('Handling sign request:', signForm);
+      
+      if (!signForm.account) {
+        setError('Please fetch an account first using eth_accounts');
+        return;
+      }
+      
+      // Convert message to hex for Ethereum signing
+      const messageHex = stringToHex(signForm.message);
+      console.log('Message in hex:', messageHex);
+      
+      // Prepare parameters based on method
+      let params: any[] = [];
+      if (signForm.method === 'personal_sign') {
+        // personal_sign expects [message, address]
+        params = [messageHex, signForm.account];
+        console.log('Using personal_sign with params:', params);
+      } else if (signForm.method === 'eth_sign') {
+        // eth_sign expects [address, message]
+        params = [signForm.account, messageHex];
+        console.log('Using eth_sign with params:', params);
+      } else if (signForm.method === 'eth_signTypedData_v4') {
+        // Example of typed data v4 - this is simplified, you'd customize this
+        const typedData = {
+          types: {
+            EIP712Domain: [
+              { name: 'name', type: 'string' },
+              { name: 'version', type: 'string' },
+              { name: 'chainId', type: 'uint256' },
+              { name: 'verifyingContract', type: 'address' },
+            ],
+            Message: [{ name: 'contents', type: 'string' }],
+          },
+          primaryType: 'Message',
+          domain: {
+            name: 'Lattice Example',
+            version: '1',
+            chainId: 1,
+            verifyingContract: '0x0000000000000000000000000000000000000000',
+          },
+          message: { contents: signForm.message },
+        };
+        params = [signForm.account, JSON.stringify(typedData)];
+        console.log('Using eth_signTypedData_v4 with params:', params);
+      }
+      
+      const payload: MethodPayload = {
+        method: signForm.method,
+        params,
       };
       
-      const response = await apiClient.signRequest(signForm.deviceId, payload);
+      console.log('Sending payload to API:', payload);
+      
+      const response = await apiClient.callDeviceMethod(signForm.deviceId, payload);
+      console.log('Received response:', response);
       setSignResponse(JSON.stringify(response, null, 2));
     } catch (e: any) {
+      console.error('Error during signing:', e);
       setError(e.message);
     }
   };
@@ -335,9 +416,9 @@ function App() {
           )}
         </section>
         
-        {/* Sign Request */}
+        {/* Sign Request using Ethereum Methods */}
         <section className="form-section">
-          <h2>4. Sign Request</h2>
+          <h2>4. Sign with Ethereum Methods</h2>
           <form onSubmit={handleSign}>
             <div className="form-group">
               <label htmlFor="sign-device-id">Device ID:</label>
@@ -350,17 +431,42 @@ function App() {
             </div>
             
             <div className="form-group">
-              <label htmlFor="sign-payload">Payload (hex):</label>
+              <label htmlFor="sign-method">Signing Method:</label>
+              <select
+                id="sign-method"
+                value={signForm.method}
+                onChange={(e) => setSignForm(prev => ({ ...prev, method: e.target.value }))}
+              >
+                <option value="personal_sign">personal_sign</option>
+                <option value="eth_sign">eth_sign</option>
+                <option value="eth_signTypedData_v4">eth_signTypedData_v4</option>
+              </select>
+            </div>
+            
+            <div className="form-group">
+              <label htmlFor="sign-message">Message to Sign:</label>
               <input
-                id="sign-payload"
-                value={signForm.payload}
-                onChange={(e) => setSignForm(prev => ({ ...prev, payload: e.target.value }))}
+                id="sign-message"
+                value={signForm.message}
+                onChange={(e) => setSignForm(prev => ({ ...prev, message: e.target.value }))}
                 required
               />
             </div>
             
-            <button type="submit" disabled={!token}>Sign</button>
+            <div className="form-group">
+              <label htmlFor="sign-account">Account (fetch using eth_accounts first):</label>
+              <input
+                id="sign-account"
+                value={signForm.account}
+                onChange={(e) => setSignForm(prev => ({ ...prev, account: e.target.value }))}
+                required
+                placeholder="0x..."
+              />
+            </div>
+            
+            <button type="submit" disabled={!token || !signForm.account}>Sign</button>
             {!token && <p className="help-text">Connect first to get a token</p>}
+            {!signForm.account && <p className="help-text">Fetch an account using eth_accounts first</p>}
           </form>
           
           {signResponse && (
