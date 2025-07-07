@@ -9,8 +9,8 @@ This open-source project provides [Lattice1](https://gridplus.io/lattice) owners
 By default, communication between apps and a Lattice1 route through cloud infrastructure provided by [GridPlus](https://gridplus.io). Any messages sent to, and from, your device will always be encrypted and remain secure; however, we believe Lattice1 owners should be able to manage this service themselves, if they so choose.
 
 ### 🔗 Related Links
- - [📢 Discord](https://twitter.com/gridplus)
- - [🐤 Twitter](https://discord.gg/Bt5fVDTJb9)
+ - [📢 Discord](https://discord.gg/Bt5fVDTJb9)
+ - [🐤 X/Twitter](https://x.com/gridplus)
  - [📚 Knowledge Base](https://docs.gridplus.io)
 &nbsp;
 
