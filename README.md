@@ -35,7 +35,7 @@ At the time of release, the previous software should continue working as-is; how
 
 It's possible to run the server:
 
- - directly on a host system using `node` v14+; or,
+ - directly on a host system using `node` v24+; or,
  - through a `Docker` container.
 
 > _**NOTE:** The instructions for each are nearly identical. This guide describes `node`;
@@ -43,7 +43,7 @@ scripts are provided in `connect/container` that support the `Docker` method._
 
 ### System Requirements
 
-Besides the runtime requirements, the system resources for the proxy server are trivial. It will work on any system which can run Node v14+, or Docker.
+Besides the runtime requirements, the system resources for the proxy server are trivial. It will work on any system which can run Node v24+, or Docker.
 
 The server has been tested on:
 
