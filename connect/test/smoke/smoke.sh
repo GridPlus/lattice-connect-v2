@@ -48,7 +48,10 @@ trap cleanup EXIT
 cleanup
 echo "== image: $IMAGE"
 dc up -d >/dev/null 2>&1 || { echo "compose up failed"; exit 1; }
-wait_ready 2 1 || { logs connect | tail -20; exit 1; }
+wait_for connect "is online" 1 || exit 1
+# spawnWorker caps APP_WORKER_COUNT=2 at the visible CPU count.
+WORKERS=$(dc exec -T connect node -p "Math.min(2, require('os').cpus().length)")
+wait_ready "$WORKERS" 1 || { logs connect | tail -20; exit 1; }
 
 # 1
 code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 5 "$BASE/")
@@ -75,7 +78,7 @@ echo "INFO  5 GET /provision -> $code"
 # 6
 connected=$(count connect "MQTT client connected"); subscribed=$(count fake-agent "agent subscribed")
 dc restart broker >/dev/null 2>&1
-if wait_ready $((connected + 2)) $((subscribed + 1)) && relay_ok; then
+if wait_ready $((connected + WORKERS)) $((subscribed + 1)) && relay_ok; then
   pass "6 relay recovers after broker restart"
 else
   fail "6 relay recovers after broker restart"
@@ -87,19 +90,19 @@ RELAY_PASS=wrong dc up -d broker >/dev/null 2>&1
 sleep 10
 refused=$(count broker "not authori")
 RELAY_PASS=pass dc up -d broker >/dev/null 2>&1
-if [ "$refused" -gt 0 ] && wait_ready $((connected + 2)) $((subscribed + 2)) && relay_ok && relay_ok; then
+if [ "$refused" -gt 0 ] && wait_ready $((connected + WORKERS)) $((subscribed + 2)) && relay_ok && relay_ok; then
   pass "7 relay recovers after broker refused credentials ($refused refusals)"
 else
   fail "7 relay recovers after broker refused credentials ($refused refusals)"
 fi
 
 # 8
-subscribed=$(count fake-agent "agent subscribed")
-AGENT_DELAY_MS=0 dc up -d fake-agent >/dev/null 2>&1
-wait_for fake-agent "agent subscribed" 1 >/dev/null
-sleep 1
-ok=0; for _ in $(seq 20); do relay_ok && ok=$((ok + 1)); done
-[ "$ok" = 20 ] && pass "8 instant agent replies (20/20)" || fail "8 instant agent replies ($ok/20)"
+if AGENT_DELAY_MS=0 dc up -d fake-agent >/dev/null 2>&1 && wait_for fake-agent "delay 0ms" 1 >/dev/null; then
+  ok=0; for _ in $(seq 20); do relay_ok && ok=$((ok + 1)); done
+  [ "$ok" = 20 ] && pass "8 instant agent replies (20/20)" || fail "8 instant agent replies ($ok/20)"
+else
+  fail "8 could not start the instant-reply agent"
+fi
 
 # 9
 if [ "${SMOKE_SLOW:-0}" = 1 ]; then

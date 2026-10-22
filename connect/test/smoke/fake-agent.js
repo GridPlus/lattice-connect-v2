@@ -11,8 +11,12 @@ const client = mqtt.connect(process.env.BROKER_URL, {
 })
 
 client.on("connect", async () => {
-  await client.subscribeAsync("to_agent/+/request/+", { qos: 1 })
-  console.log("agent subscribed")
+  try {
+    await client.subscribeAsync("to_agent/+/request/+", { qos: 1 })
+    console.log(`agent subscribed (delay ${delayMs}ms)`)
+  } catch (err) {
+    console.log(`agent subscribe failed: ${err.message}`)
+  }
 })
 
 client.on("message", (topic, payload) => {
