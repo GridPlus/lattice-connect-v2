@@ -82,32 +82,16 @@ export function createSigner(config: IClientOptions, logger?: any): { signer: IS
         payload: `${payload.length} bytes`
       }, null, 2))
 
-      try {
-        await client.subscribeAsync(subscribeTopic(deviceId, requestId), { qos: 1 })
-        await client.publishAsync(publishTopic(deviceId, requestId), payload, {
-          qos: 1,
-          retain: false,
-          dup: false
-        })
-      }
-      /**
-       * Catch 'error'
-       */
-      catch (error) {
-        logger?.info(".: [!] Error:\n", JSON.stringify({
-          error
-        }))
-        return rej(error)
-      }
-
       const emitterKey = computeEmitterKey(deviceId, requestId)
       const duration = 120000
 
-      setTimeout(() => {
+      // Listen before publishing: the device can reply before 'publishAsync' resolves.
+      const timer = setTimeout(() => {
         msgEmitter.emit(emitterKey, "TIMED_OUT")
       }, duration)
 
-      msgEmitter.once(emitterKey, async (payload) => {
+      const onReply = async (payload) => {
+        clearTimeout(timer)
         try {
           /**
            * Unsubscribe & parse 'response'
@@ -149,7 +133,28 @@ export function createSigner(config: IClientOptions, logger?: any): { signer: IS
            */
           rej(error)
         }
-      })
+      }
+      msgEmitter.once(emitterKey, onReply)
+
+      try {
+        await client.subscribeAsync(subscribeTopic(deviceId, requestId), { qos: 1 })
+        await client.publishAsync(publishTopic(deviceId, requestId), payload, {
+          qos: 1,
+          retain: false,
+          dup: false
+        })
+      }
+      /**
+       * Catch 'error'
+       */
+      catch (error) {
+        clearTimeout(timer)
+        msgEmitter.removeListener(emitterKey, onReply)
+        logger?.info(".: [!] Error:\n", JSON.stringify({
+          error
+        }))
+        return rej(error)
+      }
 
       // LOG: Send & Wait
       logger?.info(`.: [?] Awaiting approval (with timeout: ${duration}ms)...`)
