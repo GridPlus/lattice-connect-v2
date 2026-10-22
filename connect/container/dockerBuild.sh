@@ -2,7 +2,7 @@
 set -e
 cd "$(dirname "$0")"
 
-VERSION=$(node -p "require('../package.json').version")
+VERSION=$(grep -m1 '"version"' ../package.json | cut -d'"' -f4)
 
 docker build \
 -f Dockerfile \
