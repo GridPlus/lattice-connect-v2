@@ -1,4 +1,5 @@
 import cluster, { Worker } from "cluster"
+import os from "node:os"
 
 const log = {
   info: console.log
@@ -11,10 +12,11 @@ const log = {
  * At a minimum, 1 worker is guaranteed to spawn.
  */
 export function spawn({ upTo, worker }: { upTo?: string | number | undefined, worker: (worker: Worker) => void }) {
-  if (cluster.isMaster) {
+  if (cluster.isPrimary) {
     // Spawn Processes
-    const upperBound = require('os').cpus().length
-    const lowerBound = upTo ?? upperBound
+    const upperBound = os.cpus().length
+    const requested = Number(upTo)
+    const lowerBound = Number.isFinite(requested) ? requested : upperBound
     const numWorkers = Math.max(1, Math.min(lowerBound, upperBound))
     for (let i = 0; i < numWorkers; i++) {
       cluster.fork()

@@ -1,4 +1,4 @@
-require('dotenv').config()
+require('dotenv').config({ quiet: true })
 
 import { Request, Response } from "express";
 import { IAppService } from "../core"
@@ -18,7 +18,7 @@ export async function useSigning(service: IAppService) {
     password: process.env.ADMIN_CLIENT_PASS,
   }, logger)
 
-  const getDeviceId = (req: Request): string | undefined => {
+  const getDeviceId = (req: Request<{ deviceId: string }>): string | undefined => {
     return req.params?.deviceId
   }
 
@@ -27,7 +27,7 @@ export async function useSigning(service: IAppService) {
   }
 
   const getRequestData = (req: Request): any | undefined => {
-    return req.body.data?.data
+    return req.body?.data?.data
   }
 
   const preflightCheck = async (deviceId: string | undefined, res: Response) => {
@@ -43,7 +43,7 @@ export async function useSigning(service: IAppService) {
     })
   }
 
-  service.app.post("/:deviceId", async (req: Request, res: Response) => {
+  service.app.post("/:deviceId", async (req: Request<{ deviceId: string }>, res: Response) => {
     const deviceId = getDeviceId(req)
     const requestId = generateRequestId()
     const requestData = getRequestData(req)

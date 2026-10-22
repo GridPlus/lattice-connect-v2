@@ -2,8 +2,8 @@ import cluster from "cluster"
 import { startService } from "./core"
 import { useSigning } from "./services/useSigning"
 
-if (cluster.isMaster) {
-  require('dotenv').config({ debug: true, override: true, path: '.direct.env' })
+if (cluster.isPrimary) {
+  require('dotenv').config({ debug: true, override: true, path: '.direct.env', quiet: true })
 }
 
 startService({
