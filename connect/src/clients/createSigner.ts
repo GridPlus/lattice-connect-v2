@@ -86,11 +86,13 @@ export function createSigner(config: IClientOptions, logger?: any): { signer: IS
       const duration = 120000
 
       // Listen before publishing: the device can reply before 'publishAsync' resolves.
-      const timer = setTimeout(() => {
-        msgEmitter.emit(emitterKey, "TIMED_OUT")
-      }, duration)
+      // The timeout still starts only after the publish, so a request that the broker
+      // has not accepted yet cannot time out and then reach the device later.
+      let timer: NodeJS.Timeout | undefined
+      let replied = false
 
       const onReply = async (payload) => {
+        replied = true
         clearTimeout(timer)
         try {
           /**
@@ -148,12 +150,17 @@ export function createSigner(config: IClientOptions, logger?: any): { signer: IS
        * Catch 'error'
        */
       catch (error) {
-        clearTimeout(timer)
         msgEmitter.removeListener(emitterKey, onReply)
         logger?.info(".: [!] Error:\n", JSON.stringify({
           error
         }))
         return rej(error)
+      }
+
+      if (!replied) {
+        timer = setTimeout(() => {
+          msgEmitter.emit(emitterKey, "TIMED_OUT")
+        }, duration)
       }
 
       // LOG: Send & Wait
