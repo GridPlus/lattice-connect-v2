@@ -1,5 +1,66 @@
 <img src="assets/banner.png" />
 
+# 🍴 About this fork
+
+This is a maintained fork of [GridPlus/lattice-connect-v2](https://github.com/GridPlus/lattice-connect-v2). The upstream repository has had no commits since March 2023.
+
+This fork has one purpose: run the self-hosted signing relay for a Lattice1 with current, patched software. It keeps only the code that this purpose needs.
+
+### Why we forked
+
+The upstream Docker image was built on Node 16 and Alpine 3.18. Both are end of life and get no security fixes. A Trivy scan of that image found 3 critical and 53 high vulnerabilities. Most were in old dependencies such as Express 4, and in the npm that ships inside the Node image. The relay is an HTTP server, and it can be reachable from your network, so these findings matter.
+
+### What changed
+
+| Area | Upstream | This fork |
+|---|---|---|
+| Runtime | Node 16, Alpine 3.18 | Node 24 LTS, `node:24-alpine` pinned by digest |
+| Web server | Express 4 | Express 5 |
+| MQTT client | `async-mqtt` (wraps mqtt v4) | `mqtt` v5 |
+| Logging | `express-pino-logger` (deprecated) | `pino-http` |
+| Compiler and dev tools | TypeScript 4, nodemon, ts-node | TypeScript 7, tsx |
+| Image contents | npm and build tools included, runs as root | No package managers, runs as user `node` |
+| Image entrypoint | `index.js` (cloud mode) | `direct.js` (signing relay only) |
+
+All dependencies are at their latest versions. The image builds from `package-lock.json` with `npm ci`, so each build uses the same dependency versions.
+
+We also fixed these bugs:
+
+- **Lost replies:** the relay started to listen for the device's reply only after it had sent the request. A fast reply was lost, and the caller got a timeout.
+- **Reconnect after a refused connection:** mqtt v5 stops reconnecting after the broker refuses a connection one time. The relay now keeps retrying, as the old client did.
+- **Non-JSON request bodies:** Express 5 leaves the request body empty for them. The relay now returns its normal "Invalid request" response.
+
+### What we removed
+
+These parts served the GridPlus cloud service. A self-hosted relay never uses them.
+
+- `mqtt-broker/`: the RabbitMQ broker for the GridPlus cloud. In a self-hosted setup, the Lattice1 runs its own MQTT broker.
+- `pulumi/`: the GridPlus AWS deployment. It needs GridPlus's AWS account and encrypted secrets.
+- Cloud mode in `connect/`: the `index.ts` entrypoint, the `/provision` endpoint, and the device check against the RabbitMQ admin API. The `MQTT_SKIP_USER_CHECK` setting is gone, because nothing needs to skip that check now.
+
+The relay now serves only `GET /` (health check) and `POST /:deviceId` (relay a request to the device). Other paths, such as `/provision`, return 404.
+
+### Results
+
+| Check | Upstream image | This fork |
+|---|---|---|
+| Trivy findings, all severities | 3 critical and 53 high, plus lower | 0 |
+| `npm audit --omit=dev` | 16 (2 critical) | 0 |
+| Smoke test | Passes | Passes, including the 120 s device timeout |
+
+### How we test
+
+`connect/test/smoke/smoke.sh` starts an image with a local mosquitto broker and a fake Lattice1. It checks:
+
+- the relay round trip on each worker,
+- bad and non-JSON requests,
+- a broker restart,
+- a broker that refuses the relay's credentials and then accepts them again,
+- 20 instant device replies in a row,
+- the 120 s device timeout (set `SMOKE_SLOW=1`).
+
+We ran the same test on the upstream image and on this fork's image. See [connect/README.md](connect/README.md) for how to run it.
+
 # 👋 Introduction
 
 By default, [Lattice1](https://gridplus.io/lattice) devices are configured to use GridPlus' cloud services to connect apps and route messages. However, **Lattice Connect V2** allows you to disconnect your Lattice1 from the GridPlus cloud and run the services locally instead. Note that your Lattice1 still needs to be on your WiFi network in order to route local messages, as Lattice Connect V2 runs on your computer and thus must connect to your Lattice1 over LAN.
@@ -8,9 +69,17 @@ This open-source project provides [Lattice1](https://gridplus.io/lattice) owners
 
 By default, communication between apps and a Lattice1 route through cloud infrastructure provided by [GridPlus](https://gridplus.io). Any messages sent to, and from, your device will always be encrypted and remain secure; however, we believe Lattice1 owners should be able to manage this service themselves, if they so choose.
 
+### How it works
+
+```
+Wallet ──HTTP──▶ Lattice Connect (this relay) ──MQTT, port 1883──▶ MQTT broker on the Lattice1
+```
+
+The wallet sends a request over HTTP. The relay publishes it to the MQTT broker that runs on your Lattice1, then waits up to 120 seconds for the device's reply.
+
 ### 🔗 Related Links
- - [📢 Discord](https://twitter.com/gridplus)
- - [🐤 Twitter](https://discord.gg/Bt5fVDTJb9)
+ - [📢 Discord](https://discord.gg/Bt5fVDTJb9)
+ - [🐤 Twitter](https://twitter.com/gridplus)
  - [📚 Knowledge Base](https://docs.gridplus.io)
 &nbsp;
 
@@ -18,7 +87,7 @@ By default, communication between apps and a Lattice1 route through cloud infras
 
 Running _Lattice Connect_ yourself provides several advantages:
 
- - Doesn't requires running an external MQTT broker (compared to `v1`);
+ - Doesn't require running an external MQTT broker (compared to `v1`);
  - Offers the fastest message routing possible for a Lattice1;
  - Provides the highest amount of privacy available while using a Lattice1
  - Zero configuration changes required (i.e., no SSH'ing necessary);
@@ -45,11 +114,7 @@ scripts are provided in `connect/container` that support the `Docker` method._
 
 Besides the runtime requirements, the system resources for the proxy server are trivial. It will work on any system which can run Node v24+, or Docker.
 
-The server has been tested on:
-
- - macOS v10.12;
- - Ubuntu 18.04;
- - Windows 10
+This fork is tested on Linux with Docker (`node:24-alpine`).
 
 ## ⚙️ Configuring
 
@@ -58,7 +123,7 @@ Clone the repo to the server or computer you plan to run it on:
 
  ```sh
  # Clone the repo:
-$ git clone https://github.com/GridPlus/lattice-connect-v2.git
+$ git clone https://github.com/MysticRyuujin/lattice-connect-v2.git
 
 # Change your working director to the 'connect' folder:
 $ cd lattice-connect-v2/connect
@@ -80,19 +145,33 @@ On Firmware v16, and above, the device's hostname is shown with the following st
  3. Tap **Device Info**; then,
  4. See `SSH Host`.
 
+##### Environment variables
+
+The relay reads `connect/.env` first, then `connect/.direct.env`. Values in `.direct.env` win. In Docker, or another orchestrator, you can set the same variables directly.
+
+| Variable | Value in repo files | Purpose |
+|---|---|---|
+| `ADMIN_CLIENT_HOST` | placeholder in `.direct.env` (required) | URL of your Lattice1, for example `http://GridPlus-xxxxxxxxxxx.local`. The relay uses only the host name. |
+| `MQTT_HTTP_PORT` | `1883` (`.direct.env`) | MQTT port on the Lattice1. If you set `8883`, the relay uses MQTT over TLS. |
+| `APP_SERVICE_PORT` | `8080` (`.env`) | HTTP port that wallets connect to. It has no built-in default, so always set it. |
+| `APP_WORKER_COUNT` | `1` (`.direct.env`) | Number of worker processes. It is capped at the number of CPUs. If you do not set it, it is one per CPU. |
+| `ADMIN_CLIENT_USER`, `ADMIN_CLIENT_PASS` | not set | Optional credentials for the device's MQTT broker. |
+
 ## 🌐 Start Proxy: Using Node
 From inside `connect` folder, run: 
 
 ```sh
 # Install dependencies
-$ npm i 
+$ npm ci
 
-# Start the proxy
+# Start the proxy (restarts when you change a source file)
 $ npm run start:direct
 
 # Look for confirmation...
 ... [!] MQTT client connected
 ```
+
+To run the compiled build without file watching, use `npm run prod`.
 
 <img src="assets/start-direct.gif" />
 
@@ -100,12 +179,14 @@ $ npm run start:direct
 From inside the `connect/container` folder, run:
 
 ```sh
-# Script to build the container
+# Script to build the container (tags lattice-connect-v2:<version> and :latest)
 $ ./dockerBuild.sh
 
 # Script to start the proxy server
 $ ./dockerStart.sh
 ```
+
+`dockerStart.sh` passes `connect/.env` and `connect/.direct.env` to the container. The image does not contain these files.
 
 ## 🔬 Troubleshooting 
 
@@ -197,3 +278,9 @@ If you're adament about having factory settings, you may reset your router in th
 
 ### How do I connect more than one Lattice1?
 Currently, the direct method supports a single Lattice1 at a time.
+
+### Why does `/provision` return 404?
+This fork removed the GridPlus cloud mode. `/provision` created user accounts on the GridPlus RabbitMQ broker, and a self-hosted relay does not use that broker. See [What we removed](#what-we-removed).
+
+### Do I need the GridPlus `mqtt-broker` or `pulumi` folders?
+No. They ran the GridPlus cloud service. Your Lattice1 has its own MQTT broker, and the relay connects to it directly.
