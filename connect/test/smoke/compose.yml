@@ -38,6 +38,8 @@ services:
       ADMIN_CLIENT_USER: user
       ADMIN_CLIENT_PASS: pass
       MQTT_HTTP_PORT: 1883
+      # This fork ignores it. The upstream image needs it to skip its RabbitMQ
+      # user check, so the baseline comparison can run.
       MQTT_SKIP_USER_CHECK: 1
 
   fake-agent:
