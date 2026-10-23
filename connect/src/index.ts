@@ -2,7 +2,7 @@ import { startService } from "./core"
 import { useProvision } from "./services/useProvision"
 import { useSigning } from "./services/useSigning"
 
-require('dotenv').config()
+require('dotenv').config({ quiet: true })
 
 startService({
   port: process.env.APP_SERVICE_PORT,

@@ -1,37 +1,33 @@
 {
   "name": "server",
   "private": true,
-  "version": "0.0.1",
+  "version": "1.0.0",
+  "engines": {
+    "node": ">=24"
+  },
   "scripts": {
-    "start": "NODE_ENV=development nodemon ./src/index.ts",
-    "start:mqtt": "DEBUG='mqttjs*' NODE_ENV=development nodemon ./src/index.ts",
-    "start:direct": "nodemon ./src/direct.ts",
-    "start:direct:mqtt": "DEBUG='mqttjs*' NODE_ENV=development nodemon ./src/direct.ts",
-    "prod": "tsc --build tsconfig.json; NODE_ENV=production node ./dist/index.js"
+    "start": "NODE_ENV=development tsx watch ./src/index.ts",
+    "start:mqtt": "DEBUG='mqttjs*' NODE_ENV=development tsx watch ./src/index.ts",
+    "start:direct": "tsx watch ./src/direct.ts",
+    "start:direct:mqtt": "DEBUG='mqttjs*' NODE_ENV=development tsx watch ./src/direct.ts",
+    "build": "tsc",
+    "prod": "tsc; NODE_ENV=production node ./dist/index.js"
   },
   "dependencies": {
-    "async-mqtt": "^2.6.2",
-    "bs58": "^5.0.0",
-    "cors": "^2.8.5",
-    "dotenv": "^16.0.1",
-    "express": "^4.18.1",
-    "express-pino-logger": "^7.0.0",
-    "pino-http": "^8.1.1",
-    "superagent": "^8.0.0"
+    "bs58": "^6.0.0",
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.8",
+    "express": "^5.3.0",
+    "mqtt": "^5.16.1",
+    "pino-http": "^11.0.0",
+    "superagent": "^10.4.1"
   },
   "devDependencies": {
-    "@types/cors": "^2.8.12",
-    "@types/express": "^4.17.13",
-    "@types/express-pino-logger": "^4.0.3",
-    "@types/node": "^18.0.1",
-    "@types/superagent": "^4.1.15",
-    "nodemon": "^2.0.19",
-    "ts-node": "^10.8.2",
-    "typescript": "^4.7.4"
-  },
-  "nodemonConfig": {
-    "execMap": {
-      "ts": "node --require ts-node/register/transpile-only"
-    }
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^24.19.2",
+    "@types/superagent": "^8.1.11",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
   }
 }

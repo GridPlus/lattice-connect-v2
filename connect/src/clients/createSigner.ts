@@ -1,7 +1,7 @@
-import MQTT, { IClientOptions } from "async-mqtt"
+import mqtt, { IClientOptions } from "mqtt"
 import bs58 from "bs58"
 import crypto from 'crypto'
-import { EventEmitter } from "stream"
+import { EventEmitter } from "node:events"
 
 export interface ISignerClient {
   sendForApproval: (payload: Buffer, deviceId: string, requestId: string) => Promise<void>,
@@ -12,9 +12,11 @@ export function createSigner(config: IClientOptions, logger?: any): { signer: IS
   // CLIENT: MQTT Connection
   //--------------------------------------------------------------------------------
   const protocol = process.env["MQTT_HTTP_PORT"] === "8883" ? 'mqtts' : 'mqtt'
-  const client = MQTT.connect(null, {
+  const client = mqtt.connect({
     clientId: `lattice-${bs58.encode(crypto.randomBytes(8)).slice(6).toUpperCase()}`,
     protocol: protocol,
+    // mqtt v5 stops retrying after a refused CONNACK unless this is set; v4 kept retrying.
+    reconnectOnConnackError: true,
     ...config
   })
 
@@ -80,38 +82,24 @@ export function createSigner(config: IClientOptions, logger?: any): { signer: IS
         payload: `${payload.length} bytes`
       }, null, 2))
 
-      try {
-        await client.subscribe(subscribeTopic(deviceId, requestId), { qos: 1 })
-        await client.publish(publishTopic(deviceId, requestId), payload, {
-          qos: 1,
-          retain: false,
-          dup: false
-        })
-      }
-      /**
-       * Catch 'error'
-       */
-      catch (error) {
-        logger?.info(".: [!] Error:\n", JSON.stringify({
-          error
-        }))
-        return rej(error)
-      }
-
       const emitterKey = computeEmitterKey(deviceId, requestId)
       const duration = 120000
 
-      setTimeout(() => {
-        msgEmitter.emit(emitterKey, "TIMED_OUT")
-      }, duration)
+      // Listen before publishing: the device can reply before 'publishAsync' resolves.
+      // The timeout still starts only after the publish, so a request that the broker
+      // has not accepted yet cannot time out and then reach the device later.
+      let timer: NodeJS.Timeout | undefined
+      let replied = false
 
-      msgEmitter.once(emitterKey, async (payload) => {
+      const onReply = async (payload) => {
+        replied = true
+        clearTimeout(timer)
         try {
           /**
            * Unsubscribe & parse 'response'
            */
           await client
-            .unsubscribe(subscribeTopic(deviceId, requestId))
+            .unsubscribeAsync(subscribeTopic(deviceId, requestId))
             .then(() => {
               let response = {}
               if (payload === "TIMED_OUT") {
@@ -147,7 +135,33 @@ export function createSigner(config: IClientOptions, logger?: any): { signer: IS
            */
           rej(error)
         }
-      })
+      }
+      msgEmitter.once(emitterKey, onReply)
+
+      try {
+        await client.subscribeAsync(subscribeTopic(deviceId, requestId), { qos: 1 })
+        await client.publishAsync(publishTopic(deviceId, requestId), payload, {
+          qos: 1,
+          retain: false,
+          dup: false
+        })
+      }
+      /**
+       * Catch 'error'
+       */
+      catch (error) {
+        msgEmitter.removeListener(emitterKey, onReply)
+        logger?.info(".: [!] Error:\n", JSON.stringify({
+          error
+        }))
+        return rej(error)
+      }
+
+      if (!replied) {
+        timer = setTimeout(() => {
+          msgEmitter.emit(emitterKey, "TIMED_OUT")
+        }, duration)
+      }
 
       // LOG: Send & Wait
       logger?.info(`.: [?] Awaiting approval (with timeout: ${duration}ms)...`)

@@ -1,6 +1,5 @@
-import pino, { Options } from "express-pino-logger";
+import { pinoHttp, Options } from "pino-http";
 import express from "express";
-import bodyParser from "body-parser";
 import cors from "cors";
 
 type App = ReturnType<typeof express>
@@ -26,13 +25,13 @@ export function createApp(config: IAppConfig): Promise<{ app: IApp, logger: any 
   // APP: Create
   //----------------------------------------------------------------------------
   const app: IApp = express();
-  const logger = pino(config.logging)
+  const logger = pinoHttp(config.logging)
 
   //----------------------------------------------------------------------------
   // APP: Setup
   //----------------------------------------------------------------------------
   app.use(cors());
-  app.use(bodyParser.json());
+  app.use(express.json());
   app.use(logger)
 
   //----------------------------------------------------------------------------

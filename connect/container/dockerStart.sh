@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 
 docker run \
   --rm -it \
@@ -8,5 +8,4 @@ docker run \
   --env-file ../.direct.env \
   -p 8080:8080 \
   --name "lattice-connect" \
-  lattice-connect \
-  node /app/dist/direct.js
+  lattice-connect-v2:latest

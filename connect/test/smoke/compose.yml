@@ -1,0 +1,54 @@
+name: lattice-connect-smoke
+
+configs:
+  mosquitto_conf:
+    content: |
+      listener 1883
+      allow_anonymous false
+      password_file /tmp/passwd
+
+services:
+  broker:
+    image: eclipse-mosquitto:2.1.2@sha256:38c0da4f2ef84284d47b3b3eeea1cb3bdeabe81ee10caf0cd5c5ff61ee3ea408
+    configs:
+      - source: mosquitto_conf
+        target: /mosquitto/config/mosquitto.conf
+    environment:
+      RELAY_PASS: ${RELAY_PASS:-pass}
+    entrypoint:
+      - sh
+      - -c
+      - |
+        mosquitto_passwd -b -c /tmp/passwd user "$$RELAY_PASS"
+        mosquitto_passwd -b /tmp/passwd agent agent
+        chown mosquitto:mosquitto /tmp/passwd
+        chmod 0600 /tmp/passwd
+        exec mosquitto -c /mosquitto/config/mosquitto.conf
+
+  connect:
+    image: ${IMAGE:?set IMAGE}
+    depends_on:
+      - broker
+    ports:
+      - 127.0.0.1:${SMOKE_PORT:-18080}:8080
+    environment:
+      APP_SERVICE_PORT: 8080
+      APP_WORKER_COUNT: 2
+      ADMIN_CLIENT_HOST: http://broker
+      ADMIN_CLIENT_USER: user
+      ADMIN_CLIENT_PASS: pass
+      MQTT_HTTP_PORT: 1883
+      MQTT_SKIP_USER_CHECK: 1
+
+  fake-agent:
+    image: node:24-alpine@sha256:06d7adf3e0ef61a13f1d28682726366f97a15aa1888c934d3ecec86c33918b53
+    depends_on:
+      - broker
+    working_dir: /agent
+    volumes:
+      - ./fake-agent.js:/agent/fake-agent.js:ro
+      - ../../node_modules:/agent/node_modules:ro
+    environment:
+      BROKER_URL: mqtt://broker:1883
+      AGENT_DELAY_MS: ${AGENT_DELAY_MS:-200}
+    command: ["node", "fake-agent.js"]
