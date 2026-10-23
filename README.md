@@ -2,7 +2,7 @@
 
 # 🍴 About this fork
 
-This is a maintained fork of [GridPlus/lattice-connect-v2](https://github.com/GridPlus/lattice-connect-v2). The upstream repository has had no commits since March 2023.
+This is a maintained fork of [GridPlus/lattice-connect-v2](https://github.com/GridPlus/lattice-connect-v2). The upstream `main` branch has had no commits since March 2023. Some later work exists on unmerged upstream branches, the latest from April 2025.
 
 This fork has one purpose: run the self-hosted signing relay for a Lattice1 with current, patched software. It keeps only the code that this purpose needs.
 
@@ -19,7 +19,7 @@ The upstream Docker image was built on Node 16 and Alpine 3.18. Both are end of 
 | MQTT client | `async-mqtt` (wraps mqtt v4) | `mqtt` v5 |
 | Logging | `express-pino-logger` (deprecated) | `pino-http` |
 | Compiler and dev tools | TypeScript 4, nodemon, ts-node | TypeScript 7, tsx |
-| Image contents | npm and build tools included, runs as root | No package managers, runs as user `node` |
+| Image contents | npm and yarn included, runs as root | No npm, npx, corepack or yarn, runs as user `node` |
 | Image entrypoint | `index.js` (cloud mode) | `direct.js` (signing relay only) |
 
 All dependencies are at their latest versions. The image builds from `package-lock.json` with `npm ci`, so each build uses the same dependency versions.
@@ -38,7 +38,7 @@ These parts served the GridPlus cloud service. A self-hosted relay never uses th
 - `pulumi/`: the GridPlus AWS deployment. It needs GridPlus's AWS account and encrypted secrets.
 - Cloud mode in `connect/`: the `index.ts` entrypoint, the `/provision` endpoint, and the device check against the RabbitMQ admin API. The `MQTT_SKIP_USER_CHECK` setting is gone, because nothing needs to skip that check now.
 
-The relay now serves only `GET /` (health check) and `POST /:deviceId` (relay a request to the device). Other paths, such as `/provision`, return 404.
+The relay now serves only `GET /` (health check) and `POST /:deviceId` (relay a request to the device). Any other `GET`, such as `GET /provision`, returns 404. Any `POST /<name>` is a relay request for the device ID `<name>`.
 
 ### Results
 
@@ -279,8 +279,8 @@ If you're adament about having factory settings, you may reset your router in th
 ### How do I connect more than one Lattice1?
 Currently, the direct method supports a single Lattice1 at a time.
 
-### Why does `/provision` return 404?
-This fork removed the GridPlus cloud mode. `/provision` created user accounts on the GridPlus RabbitMQ broker, and a self-hosted relay does not use that broker. See [What we removed](#what-we-removed).
+### Why does `GET /provision` return 404?
+This fork removed the GridPlus cloud mode. `GET /provision` created user accounts on the GridPlus RabbitMQ broker, and a self-hosted relay does not use that broker. See [What we removed](#what-we-removed).
 
 ### Do I need the GridPlus `mqtt-broker` or `pulumi` folders?
 No. They ran the GridPlus cloud service. Your Lattice1 has its own MQTT broker, and the relay connects to it directly.
