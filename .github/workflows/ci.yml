@@ -38,7 +38,8 @@ jobs:
 
       - run: npm ci
       - run: npx tsc -p .
-      - run: npm audit --omit=dev
+      # A low advisory with no fixed release must not block CI forever.
+      - run: npm audit --omit=dev --audit-level=moderate
 
       - name: Build image
         run: docker build -f container/Dockerfile -t "$IMAGE" .

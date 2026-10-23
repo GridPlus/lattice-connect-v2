@@ -8,8 +8,10 @@ COPY src ./src
 RUN npx tsc && npm prune --omit=dev
 
 FROM base AS app
-# The app never runs a package manager, and the bundled ones carry their own CVEs.
-RUN rm -rf /usr/local/lib/node_modules /usr/local/bin/npm /usr/local/bin/npx \
+# Alpine often ships OS fixes before the node image is rebuilt. The app never runs
+# a Node package manager, and the bundled ones carry their own CVEs.
+RUN apk upgrade --no-cache \
+    && rm -rf /usr/local/lib/node_modules /usr/local/bin/npm /usr/local/bin/npx \
       /usr/local/bin/corepack /usr/local/bin/yarn /usr/local/bin/yarnpkg /opt/yarn-*
 WORKDIR /app
 COPY --from=builder /build/package.json ./
