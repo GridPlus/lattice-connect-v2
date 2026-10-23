@@ -2,7 +2,6 @@ require('dotenv').config({ quiet: true })
 
 import { Request, Response } from "express";
 import { IAppService } from "../core"
-import { createClient } from "../clients/createClient"
 import crypto from 'crypto'
 import cluster from "cluster";
 import { createSigner } from "../clients/createSigner";
@@ -30,19 +29,6 @@ export async function useSigning(service: IAppService) {
     return req.body?.data?.data
   }
 
-  const preflightCheck = async (deviceId: string | undefined, res: Response) => {
-    if (process.env.MQTT_SKIP_USER_CHECK) { return }
-    await createClient({
-      url: broker,
-      username: process.env.ADMIN_CLIENT_USER,
-      password: process.env.ADMIN_CLIENT_PASS
-    }).then(async ({ client }) => {
-      await client.get({ api: `users/${deviceId}` }).then(() =>
-        logger.info("[4] Device ID: VALID")
-      )
-    })
-  }
-
   service.app.post("/:deviceId", async (req: Request<{ deviceId: string }>, res: Response) => {
     const deviceId = getDeviceId(req)
     const requestId = generateRequestId()
@@ -65,20 +51,6 @@ export async function useSigning(service: IAppService) {
       return res.status(200).send({
         status: 400,
         message: "Invalid request"
-      })
-    }
-
-    //-------------------------------------------------------
-    // Pre-flight check ✅
-    // Check to see if the user (deviceId) exists (OPTIONAL)
-    //-------------------------------------------------------
-    try {
-      await preflightCheck(deviceId, res)
-    } catch (error) {
-      logger.info(`[!] Database request responded with: '${error}'`)
-      return res.status(200).send({
-        status: 401,
-        message: "Unauthorized"
       })
     }
 
