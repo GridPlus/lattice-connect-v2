@@ -63,7 +63,7 @@ We ran the same test on the upstream image and on this fork's image. See [connec
 
 ### How we stay up to date
 
-- **CI** (`.github/workflows/ci.yml`) runs on every pull request, on every push to `main`, and every Monday. It type-checks the code, runs `npm audit`, builds the image, runs the smoke test, and scans the image with Trivy. Results go to the repository's Security tab. The run fails on any fixable HIGH or CRITICAL finding. The weekly run catches new vulnerabilities in an image whose code did not change.
+- **CI** (`.github/workflows/ci.yml`) runs on every pull request, on every push to `main`, and every Monday. It type-checks the code, runs `npm audit` (failing on moderate or higher), builds the image, runs the smoke test, and scans the image with Trivy. Results go to the repository's Security tab. The run fails on any fixable HIGH or CRITICAL finding. The weekly run catches new vulnerabilities in an image whose code did not change.
 - **Dependabot** (`.github/dependabot.yml`) opens weekly pull requests for npm packages, the `node:24-alpine` base image, the smoke test images, and the GitHub Actions. It also opens a pull request at once when a dependency has a known vulnerability. CI tests each pull request before you merge it. Dependabot does not propose a new Node major version. Move to the next Node LTS by hand, together with `@types/node`.
 - **CodeQL** scans the TypeScript source, and **secret scanning** blocks pushes that contain credentials.
 
