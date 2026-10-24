@@ -1,5 +1,12 @@
 import { appConfig } from "./config"
-import { startService } from "./core"
+import { spawn } from "./core/spawnWorker"
+import { startServer } from "./core/startServer"
 import { useSigning } from "./services/useSigning"
 
-startService(appConfig, [useSigning])
+spawn({
+  upTo: appConfig.workers,
+  worker: worker => startServer(worker, appConfig.port, useSigning).catch(err => {
+    console.error(err)
+    process.exit(1)
+  })
+})

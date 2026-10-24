@@ -22,6 +22,7 @@ export function spawn({ upTo, worker }: { upTo?: string | number | undefined, wo
       cluster.fork()
     }
 
+    // The smoke test waits for "is online" and counts "died".
     cluster.on('online', function (worker) {
       log.info('Worker ' + worker.id + ' is online')
     })

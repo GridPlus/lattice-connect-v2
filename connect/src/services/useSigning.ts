@@ -9,11 +9,10 @@ const toResponseBody = (result: SignerResult) => result.kind === "answered"
   ? { status: 200, message: result.payload }
   : { status: 500, message: "Timed out waiting for response from device" }
 
-export async function useSigning(service: IAppService) {
-  const logger = service.logger
+export function useSigning({ app, logger }: IAppService) {
   const signer = createSigner(connectBroker(brokerOptions(), logger), logger)
 
-  service.app.post("/:deviceId", async (req: Request<{ deviceId: string }>, res: Response) => {
+  app.post("/:deviceId", async (req: Request<{ deviceId: string }>, res: Response) => {
     const deviceId = req.params.deviceId
     const requestId = crypto.randomBytes(4).toString('hex')
     const requestData = req.body?.data?.data
