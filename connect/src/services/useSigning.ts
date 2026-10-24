@@ -26,31 +26,18 @@ export function useSigning({ app, logger }: IAppService) {
     const parsed = RelayRequest.safeParse(req.body)
     const payload = parsed.success ? Buffer.from(parsed.data.data.data) : undefined
 
-    logger.info("------------------------")
-    logger.info("HANDLING MESSAGE [RELAY]")
-    logger.info("------------------------")
-    logger.info(`[0] Worker #${cluster.worker?.id} received payload...`)
-    logger.info(`[1] Request ID created: '${requestId}'`)
-    logger.info(`[2] Device ID: '${deviceId}'`)
+    logger.info(`.: [relay] Worker #${cluster.worker?.id} received request '${requestId}' for device '${deviceId}'`)
 
-    //-------------------------------------------------------
-    // Pre-flight check ✅
-    // Validate the received payload. The route only matches a non-empty deviceId.
-    //-------------------------------------------------------
+    // The route only matches a non-empty deviceId, so only the payload needs checking.
     if (!payload) {
-      logger.info("[!] Failed to parse request (missing or malformed 'data.data')")
+      logger.info(`.: [relay] Rejected request '${requestId}': missing or malformed 'data.data'`)
       return res.status(200).send({
         status: 400,
         message: "Invalid request"
       })
     }
 
-    //-------------------------------------------------------
-    // Relay message; wait for approval 🔄
-    //-------------------------------------------------------
     try {
-      logger.info("[3] Payload: VALID")
-
       const result = await signer.sendForApproval(payload, deviceId, requestId)
       return res.send(toResponseBody(result))
     } catch (error) {
