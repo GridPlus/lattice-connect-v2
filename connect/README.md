@@ -4,11 +4,13 @@
 
 ### Layout
 
-- `src/direct.ts`: the entrypoint. It loads `.env` and `.direct.env` and starts the workers.
+- `src/direct.ts`: the entrypoint. It starts the workers.
+- `src/config.ts`: loads `.env`, then `.direct.env`, and reads the settings.
 - `src/services/useSigning.ts`: `POST /:deviceId` relays a request to the device.
 - `src/clients/createSigner.ts`: the MQTT client that talks to the broker on the Lattice1.
-- `src/core/`: the Express app, the HTTP server and the worker processes.
+- `src/core/`: the HTTP server and the worker processes.
 - `container/`: the Dockerfile and the build and start scripts.
+- `test/unit/`: unit tests for the MQTT signer.
 - `test/smoke/`: the smoke test.
 
 ### Commands
@@ -18,12 +20,13 @@ $ npm ci                    # install dependencies from the lockfile
 $ npm run start:direct      # run from source and restart on changes (tsx)
 $ npm run build             # compile to dist/ (TypeScript 7)
 $ npm run prod              # compile, then run dist/direct.js
+$ npm test                  # run the unit tests
 $ npm audit --omit=dev      # check runtime dependencies for known vulnerabilities
 ```
 
 ### Smoke test
 
-`test/smoke/smoke.sh <image>` runs an image against a local mosquitto broker and a fake Lattice1 agent. It checks the relay round trip, bad requests, broker restarts, refused credentials, and fast replies. Run `npm ci` first: the fake agent uses the `mqtt` package from `node_modules`. Set `SMOKE_SLOW=1` to also check the 120 s device timeout.
+`test/smoke/smoke.sh <image>` runs an image against a local mosquitto broker and a fake Lattice1 agent. It checks the relay round trip, bad requests and payloads, broker restarts, refused credentials, and fast replies. Run `npm ci` first: the fake agent uses the `mqtt` package from `node_modules`. Set `SMOKE_SLOW=1` to also check the 120 s device timeout.
 
 ```sh
 $ npm ci

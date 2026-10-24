@@ -75,12 +75,10 @@ out=$(post 'hello' text/plain)
 [ "$(jq -r .status <<<"$out" 2>/dev/null)" = 400 ] && pass "4 text/plain body -> status 400" || fail "4 text/plain body -> $out"
 ok=0; for _ in 1 2; do relay_ok && ok=$((ok + 1)); done
 [ "$ok" = 2 ] && pass "4 workers still relay after bad body" || fail "4 workers after bad body ($ok/2)"
-out=$(post_full '{"data":{"data":{"not":"bytes"}}}')
-[ "$out" = '200 {"status":400,"message":"Invalid request"}' ] && pass "4 non-byte payload -> status 400" || fail "4 non-byte payload -> $out"
 
-# 5: informational, the expected value depends on the entrypoint
-code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 "$BASE/provision")
-echo "INFO  5 GET /provision -> $code"
+# 5
+out=$(post_full '{"data":{"data":{"not":"bytes"}}}')
+[ "$out" = '200 {"status":400,"message":"Invalid request"}' ] && pass "5 non-byte payload -> status 400" || fail "5 non-byte payload -> $out"
 
 # 6
 connected=$(count connect "MQTT client connected"); subscribed=$(count fake-agent "agent subscribed")

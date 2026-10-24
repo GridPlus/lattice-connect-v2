@@ -50,20 +50,22 @@ The relay now serves only `GET /` (health check) and `POST /:deviceId` (relay a 
 
 ### How we test
 
+`npm test` in `connect/` runs unit tests for the MQTT signer. They check a device reply that arrives before the broker acknowledges the request, the device timeout, a failed publish, and a failed unsubscribe after the device replied.
+
 `connect/test/smoke/smoke.sh` starts an image with a local mosquitto broker and a fake Lattice1. It checks:
 
 - the relay round trip on each worker,
-- bad and non-JSON requests,
+- bad and non-JSON requests, and payloads that are not bytes,
 - a broker restart,
 - a broker that refuses the relay's credentials and then accepts them again,
 - 20 instant device replies in a row,
 - the 120 s device timeout (set `SMOKE_SLOW=1`).
 
-We ran the same test on the upstream image and on this fork's image. See [connect/README.md](connect/README.md) for how to run it.
+We ran the same test on the upstream image, which needs `MQTT_SKIP_USER_CHECK=1` to skip its RabbitMQ check, and on this fork's image. See [connect/README.md](connect/README.md) for how to run it.
 
 ### How we stay up to date
 
-- **CI** (`.github/workflows/ci.yml`) runs on every pull request, on every push to `main`, and every Monday. It type-checks the code, runs `npm audit` (failing on moderate or higher), builds the image, runs the smoke test, and scans the image with Trivy. Results go to the repository's Security tab. The run fails on any fixable HIGH or CRITICAL finding. The weekly run catches new vulnerabilities in an image whose code did not change.
+- **CI** (`.github/workflows/ci.yml`) runs on every pull request, on every push to `main`, and every Monday. It type-checks the code and the unit tests, runs the unit tests, runs `npm audit` (failing on moderate or higher), builds the image, runs the smoke test, and scans the image with Trivy. Results go to the repository's Security tab. The run fails on any fixable HIGH or CRITICAL finding. The weekly run catches new vulnerabilities in an image whose code did not change.
 - **Dependabot** (`.github/dependabot.yml`) opens weekly pull requests for npm packages, the `node:24-alpine` base image, the smoke test images, and the GitHub Actions. It also opens a pull request at once when a dependency has a known vulnerability. CI tests each pull request before you merge it. Dependabot does not propose a new Node major version. Move to the next Node LTS by hand, together with `@types/node`.
 - **CodeQL** scans the TypeScript source, and **secret scanning** blocks pushes that contain credentials.
 
