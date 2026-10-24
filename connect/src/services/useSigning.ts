@@ -1,9 +1,17 @@
 import { Request, Response } from "express";
+import { z } from "zod";
 import { IAppService } from "../core"
 import crypto from 'crypto'
 import cluster from "cluster";
 import { brokerOptions } from "../config";
 import { connectBroker, createSigner, SignerResult } from "../clients/createSigner";
+
+/** The SDK posts the request frame as `{ data: { data: <bytes or string> } }`. */
+const RelayRequest = z.object({
+  data: z.object({
+    data: z.union([z.string().min(1), z.array(z.number())]),
+  }),
+})
 
 const toResponseBody = (result: SignerResult) => result.kind === "answered"
   ? { status: 200, message: result.payload }
@@ -15,7 +23,8 @@ export function useSigning({ app, logger }: IAppService) {
   app.post("/:deviceId", async (req: Request<{ deviceId: string }>, res: Response) => {
     const deviceId = req.params.deviceId
     const requestId = crypto.randomBytes(4).toString('hex')
-    const requestData = req.body?.data?.data
+    const parsed = RelayRequest.safeParse(req.body)
+    const payload = parsed.success ? Buffer.from(parsed.data.data.data) : undefined
 
     logger.info("------------------------")
     logger.info("HANDLING MESSAGE [RELAY]")
@@ -28,7 +37,7 @@ export function useSigning({ app, logger }: IAppService) {
     // Pre-flight check ✅
     // Validate the received payload
     //-------------------------------------------------------
-    if (!requestData || !deviceId) {
+    if (!payload || !deviceId) {
       logger.info("[!] Failed to parse request (missing 'requestData' OR 'deviceId')")
       logger.info(`[!] 'deviceId': ${deviceId}`)
       return res.status(200).send({
@@ -41,7 +50,6 @@ export function useSigning({ app, logger }: IAppService) {
     // Relay message; wait for approval 🔄
     //-------------------------------------------------------
     try {
-      const payload = Buffer.from(requestData)
       logger.info("[3] Payload: VALID")
 
       const result = await signer.sendForApproval(payload, deviceId, requestId)

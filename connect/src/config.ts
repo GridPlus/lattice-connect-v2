@@ -2,7 +2,7 @@ import dotenv from "dotenv"
 import { IClientOptions } from "mqtt"
 
 // Later files win, as with `docker run --env-file .env --env-file .direct.env`.
-// Workers are forked with the primary's environment, so loading here once is enough.
+// The primary and every worker load the same files, so they see the same values.
 dotenv.config({ path: ".env", quiet: true })
 dotenv.config({ path: ".direct.env", override: true, quiet: true })
 
