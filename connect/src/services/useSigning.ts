@@ -31,15 +31,14 @@ export function useSigning({ app, logger }: IAppService) {
     logger.info("------------------------")
     logger.info(`[0] Worker #${cluster.worker?.id} received payload...`)
     logger.info(`[1] Request ID created: '${requestId}'`)
-    logger.info(`[2] Verifying deviceId: '${deviceId}'...`)
+    logger.info(`[2] Device ID: '${deviceId}'`)
 
     //-------------------------------------------------------
     // Pre-flight check ✅
-    // Validate the received payload
+    // Validate the received payload. The route only matches a non-empty deviceId.
     //-------------------------------------------------------
-    if (!payload || !deviceId) {
-      logger.info("[!] Failed to parse request (missing 'requestData' OR 'deviceId')")
-      logger.info(`[!] 'deviceId': ${deviceId}`)
+    if (!payload) {
+      logger.info("[!] Failed to parse request (missing or malformed 'data.data')")
       return res.status(200).send({
         status: 400,
         message: "Invalid request"

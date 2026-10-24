@@ -16,7 +16,7 @@ export type SignerResult =
   | { kind: "answered", payload: string }
   | { kind: "timedOut" }
 
-export interface ISignerClient {
+export interface Signer {
   sendForApproval: (payload: Buffer, deviceId: string, requestId: string) => Promise<SignerResult>,
 }
 
@@ -41,12 +41,12 @@ export function connectBroker(config: IClientOptions, logger?: Logger): MqttClie
   return client
 }
 
-export function createSigner(client: BrokerClient, logger?: Logger, timeoutMs = DEVICE_TIMEOUT_MS): ISignerClient {
+export function createSigner(client: BrokerClient, logger?: Logger, timeoutMs = DEVICE_TIMEOUT_MS): Signer {
   const replies = new EventEmitter()
 
   client.on("message", (topic, payload) => {
     const [, deviceId, , requestId] = topic.split('/')
-    logger?.info(".: [!] MQTT client receieved:\n", JSON.stringify({
+    logger?.info(".: [!] MQTT client received:\n", JSON.stringify({
       topic,
       deviceId,
       requestId,
