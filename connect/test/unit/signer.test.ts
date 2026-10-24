@@ -39,6 +39,21 @@ function fakeBroker(opts: {
   return { client, unsubscribed }
 }
 
+test("AC-1: a failed publish fails the request and removes the response subscription", async () => {
+  const broker = fakeBroker({ publishError: new Error("publish refused") })
+  const { signer } = createSigner(broker.client)
+
+  await assert.rejects(signer.sendForApproval(REQUEST, "dev1", "req1"), /publish refused/)
+  assert.deepEqual(broker.unsubscribed, [RESPONSE_TOPIC])
+})
+
+test("AC-2: a failed unsubscribe after the reply still answers with the reply", async () => {
+  const broker = fakeBroker({ replyAfterPublishMs: 0, unsubscribeError: new Error("unsubscribe refused") })
+  const { signer } = createSigner(broker.client)
+
+  assert.deepEqual(await signer.sendForApproval(REQUEST, "dev1", "req1"), { kind: "answered", payload: "030201" })
+})
+
 test("AC-3: a reply that arrives before the publish acknowledgement is answered", async () => {
   const broker = fakeBroker({ replyBeforePublishAck: true, publishDelayMs: 20 })
   const { signer } = createSigner(broker.client, undefined, 50)
