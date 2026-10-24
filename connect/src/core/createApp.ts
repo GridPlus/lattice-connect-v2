@@ -1,6 +1,7 @@
 import { pinoHttp, Options } from "pino-http";
 import express from "express";
 import cors from "cors";
+import type { Logger } from ".";
 
 type App = ReturnType<typeof express>
 
@@ -20,7 +21,7 @@ export interface IApp extends App {
  * @param config The object that defines specific features of our app instance.
  * @returns An 'app' & 'logger' which is associated with the app.
  */
-export function createApp(config: IAppConfig): Promise<{ app: IApp, logger: any }> {
+export function createApp(config: IAppConfig): Promise<{ app: IApp, logger: Logger }> {
   //----------------------------------------------------------------------------
   // APP: Create
   //----------------------------------------------------------------------------

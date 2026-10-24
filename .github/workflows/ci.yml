@@ -38,6 +38,7 @@ jobs:
 
       - run: npm ci
       - run: npx tsc -p .
+      - run: npm test
       # A low advisory with no fixed release must not block CI forever.
       - run: npm audit --omit=dev --audit-level=moderate
 

@@ -9,6 +9,7 @@
     "start:direct": "tsx watch ./src/direct.ts",
     "start:direct:mqtt": "DEBUG='mqttjs*' NODE_ENV=development tsx watch ./src/direct.ts",
     "build": "tsc",
+    "test": "node --import tsx --test test/unit/*.test.ts",
     "prod": "tsc; NODE_ENV=production node ./dist/direct.js"
   },
   "dependencies": {

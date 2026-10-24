@@ -3,9 +3,13 @@ import { startServer } from "./startServer"
 import { spawn } from "./spawnWorker"
 import { Worker } from "cluster";
 
+export interface Logger {
+  info: (...args: unknown[]) => void
+}
+
 export interface IAppService {
   app: IApp,
-  logger: any
+  logger: Logger
 }
 
 export function startService(config: IAppConfig, useService: ((service: IAppService) => void)[]) {

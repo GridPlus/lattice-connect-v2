@@ -1,38 +1,22 @@
-require('dotenv').config({ quiet: true })
-
 import { Request, Response } from "express";
 import { IAppService } from "../core"
 import crypto from 'crypto'
 import cluster from "cluster";
-import { createSigner } from "../clients/createSigner";
+import { brokerOptions } from "../config";
+import { connectBroker, createSigner, SignerResult } from "../clients/createSigner";
+
+const toResponseBody = (result: SignerResult) => result.kind === "answered"
+  ? { status: 200, message: result.payload }
+  : { status: 500, message: "Timed out waiting for response from device" }
 
 export async function useSigning(service: IAppService) {
   const logger = service.logger
-  const broker = new URL(`${process.env.ADMIN_CLIENT_HOST}`)
-
-  const { signer } = createSigner({
-    host: broker.hostname,
-    port: parseInt(`${process.env.MQTT_HTTP_PORT}`),
-    username: process.env.ADMIN_CLIENT_USER,
-    password: process.env.ADMIN_CLIENT_PASS,
-  }, logger)
-
-  const getDeviceId = (req: Request<{ deviceId: string }>): string | undefined => {
-    return req.params?.deviceId
-  }
-
-  const generateRequestId = (): string => {
-    return crypto.randomBytes(4).toString('hex')
-  }
-
-  const getRequestData = (req: Request): any | undefined => {
-    return req.body?.data?.data
-  }
+  const { signer } = createSigner(connectBroker(brokerOptions(), logger), logger)
 
   service.app.post("/:deviceId", async (req: Request<{ deviceId: string }>, res: Response) => {
-    const deviceId = getDeviceId(req)
-    const requestId = generateRequestId()
-    const requestData = getRequestData(req)
+    const deviceId = req.params.deviceId
+    const requestId = crypto.randomBytes(4).toString('hex')
+    const requestData = req.body?.data?.data
 
     logger.info("------------------------")
     logger.info("HANDLING MESSAGE [RELAY]")
@@ -58,16 +42,15 @@ export async function useSigning(service: IAppService) {
     // Relay message; wait for approval 🔄
     //-------------------------------------------------------
     try {
-      const payload = Buffer.from(requestData!)
+      const payload = Buffer.from(requestData)
       logger.info("[3] Payload: VALID")
 
-      const response = await signer.sendForApproval(payload, deviceId, requestId)
-
-      return res.send(response)
-    } catch (error: any) {
+      const result = await signer.sendForApproval(payload, deviceId, requestId)
+      return res.send(toResponseBody(result))
+    } catch (error) {
       return res.status(500).send({
         status: 500,
-        message: `Error while attempting to relay message. Reason: '${error.message}'`
+        message: `Error while attempting to relay message. Reason: '${error instanceof Error ? error.message : error}'`
       })
     }
   })

@@ -1,11 +1,12 @@
 import http from "http";
 import { Worker } from "cluster";
 import { createApp, IAppConfig } from "./createApp";
+import type { IAppService } from ".";
 
 export async function startServer({ worker, config }: {
   worker: Worker,
   config: IAppConfig
-}): Promise<{ app: any, logger: any }> {
+}): Promise<IAppService> {
   //----------------------------------------------------------------------------------
   // APP: Port
   //----------------------------------------------------------------------------------
@@ -18,8 +19,8 @@ export async function startServer({ worker, config }: {
    * It resolves once it begins listening; it rejects once 'server' receives its
    * first (and only) error, at which time the 'server' calls 'close()'.
    */
-  const createServer = ({ app, logger }) => {
-    return new Promise<{ app: any, logger: any }>((resolve, rejected) => {
+  const createServer = ({ app, logger }: IAppService) => {
+    return new Promise<IAppService>((resolve, rejected) => {
       //------------------------------------------------------------------------------
       // HTTP: Create 'Server'
       //------------------------------------------------------------------------------

@@ -5,7 +5,6 @@
     "rootDir": "src",
     "outDir": "dist",
     "strict": true,
-    "noImplicitAny": false,
     "types": ["node"],
     "esModuleInterop": true,
     "resolveJsonModule": true,

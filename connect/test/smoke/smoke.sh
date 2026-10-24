@@ -29,13 +29,18 @@ wait_for() {
 }
 
 post() {
-  curl -s --max-time "${3:-10}" -H "Content-Type: ${2:-application/json}" -d "$1" "$BASE/dev1"
+  curl -s --max-time "${3:-10}" -H "Content-Type: ${2:-application/json}" -d "$1" "$BASE/${4:-dev1}"
+}
+
+# Prints "<http code> <compact body>" so a check covers both.
+post_full() {
+  local out
+  out=$(curl -s -w '\n%{http_code}' --max-time "${2:-10}" -H "Content-Type: application/json" -d "$1" "$BASE/${3:-dev1}")
+  echo "$(tail -n1 <<<"$out") $(sed '$d' <<<"$out" | jq -c . 2>/dev/null)"
 }
 
 relay_ok() {
-  local out
-  out=$(post '{"data":{"data":[1,2,3]}}')
-  [ "$(jq -c '{status,message}' <<<"$out" 2>/dev/null)" = '{"status":200,"message":"030201"}' ]
+  [ "$(post_full '{"data":{"data":[1,2,3]}}')" = '200 {"status":200,"message":"030201"}' ]
 }
 
 wait_ready() {
@@ -106,8 +111,9 @@ fi
 
 # 9
 if [ "${SMOKE_SLOW:-0}" = 1 ]; then
-  out=$(curl -s --max-time 130 -H 'Content-Type: application/json' -d '{"data":{"data":[1]}}' "$BASE/silent")
-  [ "$(jq -r .status <<<"$out" 2>/dev/null)" = 500 ] && pass "9 device timeout -> status 500" || fail "9 device timeout -> $out"
+  out=$(post_full '{"data":{"data":[1]}}' 130 silent)
+  [ "$out" = '200 {"status":500,"message":"Timed out waiting for response from device"}' ] \
+    && pass "9 device timeout -> status 500" || fail "9 device timeout -> $out"
 fi
 
 died=$(count connect "died")
