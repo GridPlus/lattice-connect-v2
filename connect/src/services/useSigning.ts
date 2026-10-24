@@ -11,7 +11,7 @@ const toResponseBody = (result: SignerResult) => result.kind === "answered"
 
 export async function useSigning(service: IAppService) {
   const logger = service.logger
-  const { signer } = createSigner(connectBroker(brokerOptions(), logger), logger)
+  const signer = createSigner(connectBroker(brokerOptions(), logger), logger)
 
   service.app.post("/:deviceId", async (req: Request<{ deviceId: string }>, res: Response) => {
     const deviceId = req.params.deviceId
