@@ -1,12 +1,12 @@
-import cluster from "cluster"
-import { startService } from "./core"
+import { appConfig } from "./config"
+import { spawn } from "./core/spawnWorker"
+import { startServer } from "./core/startServer"
 import { useSigning } from "./services/useSigning"
 
-if (cluster.isMaster) {
-  require('dotenv').config({ debug: true, override: true, path: '.direct.env' })
-}
-
-startService({
-  port: process.env.APP_SERVICE_PORT,
-  workers: process.env.APP_WORKER_COUNT
-}, [useSigning])
+spawn({
+  upTo: appConfig.workers,
+  worker: worker => startServer(worker, appConfig.port, useSigning).catch(err => {
+    console.error(err)
+    process.exit(1)
+  })
+})

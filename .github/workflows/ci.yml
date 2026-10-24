@@ -1,0 +1,69 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  # Weekly, so new CVEs in an unchanged image still show up.
+  schedule:
+    - cron: "23 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-test-scan:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      security-events: write
+    defaults:
+      run:
+        working-directory: connect
+    env:
+      IMAGE: lattice-connect-v2:ci
+      # The trivy-action tags were hijacked in 2026, so run the scanner image pinned by digest.
+      TRIVY: aquasec/trivy:0.58.1@sha256:ab70a02200597efa04748f210f793936eb647cbcdb0ea69cc30b226d6f5a22c7
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: connect/package-lock.json
+
+      - run: npm ci
+      - run: npx tsc -p .
+      - run: npx tsc -p test/unit
+      - run: npm test
+      # A low advisory with no fixed release must not block CI forever.
+      - run: npm audit --omit=dev --audit-level=moderate
+
+      - name: Build image
+        run: docker build -f container/Dockerfile -t "$IMAGE" .
+
+      - name: Smoke test
+        run: test/smoke/smoke.sh "$IMAGE"
+
+      - name: Trivy scan (SARIF for the Security tab)
+        run: |
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+            -v "$HOME/.cache/trivy:/root/.cache/trivy" -v "$PWD:/out" \
+            "$TRIVY" image --scanners vuln --format sarif --output /out/trivy.sarif "$IMAGE"
+
+      - uses: github/codeql-action/upload-sarif@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
+        if: always() && hashFiles('connect/trivy.sarif') != ''
+        with:
+          sarif_file: connect/trivy.sarif
+          category: trivy-image
+
+      - name: Fail on fixable HIGH or CRITICAL findings
+        run: |
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+            -v "$HOME/.cache/trivy:/root/.cache/trivy" \
+            "$TRIVY" image --scanners vuln --skip-db-update --severity HIGH,CRITICAL \
+            --ignore-unfixed --exit-code 1 "$IMAGE"

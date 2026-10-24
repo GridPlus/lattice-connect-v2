@@ -1,6 +1,0 @@
-config:
-  aws:profile: default
-  aws:region: us-east-1
-  lattice-connect-v2:deploy:
-    env: dev
-    hostname: example.com

@@ -1,36 +1,35 @@
 import cluster, { Worker } from "cluster"
-
-const log = {
-  info: console.log
-}
+import os from "node:os"
 
 /**
- * Spawns as many workers as there are CPUs on the host system, 
- * unless limited by `limitTo`. 
+ * Spawns as many workers as there are CPUs on the host system,
+ * unless limited by `upTo`.
  *
  * At a minimum, 1 worker is guaranteed to spawn.
  */
-export function spawn({ upTo, worker }: { upTo?: string | number | undefined, worker: (worker: Worker) => void }) {
-  if (cluster.isMaster) {
+export function spawn({ upTo, worker }: { upTo?: string, worker: (worker: Worker) => void }) {
+  if (cluster.isPrimary) {
     // Spawn Processes
-    const upperBound = require('os').cpus().length
-    const lowerBound = upTo ?? upperBound
+    const upperBound = os.cpus().length
+    const requested = Number(upTo)
+    const lowerBound = Number.isFinite(requested) ? requested : upperBound
     const numWorkers = Math.max(1, Math.min(lowerBound, upperBound))
     for (let i = 0; i < numWorkers; i++) {
       cluster.fork()
     }
 
+    // The smoke test waits for "is online" and counts "died".
     cluster.on('online', function (worker) {
-      log.info('Worker ' + worker.id + ' is online')
+      console.log('Worker ' + worker.id + ' is online')
     })
 
     cluster.on('exit', function (worker, code, signal) {
-      log.info(`Worker ${worker.id} died with code: ${code}, and signal: ${signal}`)
+      console.log(`Worker ${worker.id} died with code: ${code}, and signal: ${signal}`)
       if (code != 0 && code != 1) {
-        log.info('Starting a new worker')
+        console.log('Starting a new worker')
         cluster.fork()
       } else {
-        log.info(`Worker ${worker.id} is not being replaced. Exiting.`)
+        console.log(`Worker ${worker.id} is not being replaced. Exiting.`)
       }
     })
   }
